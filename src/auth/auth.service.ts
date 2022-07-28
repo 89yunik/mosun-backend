@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
-  googleLogin() {
-    return 'google login';
-  }
-  naverLogin() {
-    return 'naver login';
+  constructor(private usersService: UsersService) {}
+  login(domain: string): string {
+    return `${domain} login`;
   }
 }
