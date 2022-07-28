@@ -15,17 +15,16 @@ export class UsersService {
       name: 'maria',
     },
   ];
-
-  async findOrCreateUser(
-    email: string,
-    name: string,
-  ): Promise<User | undefined> {
-    const user = this.users.find((user) => user.email === email);
+  async createUser(user: User): Promise<User> {
+    this.users.push(user);
+    return this.users[this.users.length - 1];
+  }
+  async readUserByEmail(target: User): Promise<User | undefined> {
+    const user = this.users.find((user) => user.email === target.email);
     if (user) {
       return user;
     } else {
-      this.users.push({ email, name });
-      return this.users[this.users.length - 1];
+      throw new Error('입력한 값에 해당하는 사용자를 찾을 수 없습니다.');
     }
   }
 }
