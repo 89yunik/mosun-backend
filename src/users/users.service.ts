@@ -20,7 +20,7 @@ export class UsersService {
     email: string,
     name: string,
   ): Promise<User | undefined> {
-    const user = this.users.find((user) => user.name === name);
+    const user = this.users.find((user) => user.email === email);
     if (user) {
       return user;
     } else {
