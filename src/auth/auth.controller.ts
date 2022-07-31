@@ -1,28 +1,40 @@
-import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Req,
+  Post,
+  Get,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { User } from './decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('google')
+  @Get('google')
   @UseGuards(GoogleAuthGuard)
-  googleLogin(@Request() req): Promise<any> {
-    return this.authService.login(req.user);
+  googleLogin(): void {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @HttpCode(200)
+  googleCallback(@User() user: unknown): void {
+    console.log(user);
+    return;
   }
 
-  @Post('kakao')
+  @Get('kakao')
   @UseGuards(KakaoAuthGuard)
-  kakaoLogin(@Request() req): Promise<any> {
-    return this.authService.login(req.user);
-  }
+  kakaoLogin(): void {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
+  getProfile(@Req() req) {
     return req.user;
   }
 }
