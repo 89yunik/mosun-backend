@@ -23,7 +23,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     const name = profile._json.properties.nickname;
     try {
       const user = await this.authService.readOrCreateUser({ email, name });
-      return done(null, user);
+      done(null, user);
     } catch (err) {
       done(err, undefined);
     }

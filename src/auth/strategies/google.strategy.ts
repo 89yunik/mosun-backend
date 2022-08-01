@@ -23,7 +23,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     const { email, name } = profile._json;
     try {
       const user = await this.authService.readOrCreateUser({ email, name });
-      return done(null, user);
+      done(null, user);
     } catch (err) {
       done(err, undefined);
     }
