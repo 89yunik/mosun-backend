@@ -11,6 +11,7 @@ import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
+import { UserType } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
@@ -23,8 +24,8 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
-  googleCallback(@User() user: unknown): void {
-    console.log(user);
+  googleCallback(@User() user: UserType): void {
+    console.log(this.authService.setToken(user));
     return;
   }
 
@@ -34,7 +35,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req) {
-    return req.user;
+  getProfile(@User() user: UserType) {
+    return user;
   }
 }

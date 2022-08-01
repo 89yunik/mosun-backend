@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/users.service';
+import { UserType } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +9,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
-  async readOrCreateUser(target: User): Promise<User> {
+  async readOrCreateUser(target: UserType): Promise<UserType> {
     let user = await this.usersService.readUserByEmail(target);
     if (!user) {
       console.log('회원가입');
@@ -17,9 +17,11 @@ export class AuthService {
     }
     return user;
   }
-  async setToken(user: any) {
-    return {
-      access_token: this.jwtService.sign(user),
-    };
+  async setToken(target: UserType) {
+    const token = this.jwtService.sign(target, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: process.env.ACCESS_EXP,
+    });
+    return token;
   }
 }
