@@ -14,12 +14,12 @@ const validateEmail = (email: string): boolean => {
 export class UsersService {
   private readonly users = [
     {
-      email: 'changeme@test.com',
+      email: 'test@existentEmail.com',
       name: 'john',
     },
     {
-      email: 'guess@test.com',
-      name: 'maria',
+      email: 'existentUser@test.com',
+      name: 'existentUser',
     },
   ];
   async createUser(target: UserType): Promise<UserType> {
@@ -42,5 +42,14 @@ export class UsersService {
       error.name = 'Unprocessable Entity';
       throw error;
     }
+  }
+
+  async readOrCreateUser(target: UserType): Promise<UserType> {
+    let user = await this.readUserByEmail(target.email);
+    if (!user) {
+      console.log('회원가입');
+      user = await this.createUser(target);
+    }
+    return user;
   }
 }

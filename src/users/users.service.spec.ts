@@ -16,13 +16,14 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
     expect(service.createUser).toBeDefined();
     expect(service.readUserByEmail).toBeDefined();
+    expect(service.readOrCreateUser).toBeDefined();
   });
 
   it('should return a created user', async () => {
-    const validEmail = { email: 'test@test.com', name: 'test' };
+    const validEmail = { email: 'test@validEmail.com', name: 'test' };
     expect(await service.createUser(validEmail)).toEqual(validEmail);
 
-    const invalidEmail = { email: '@test.com', name: 'test' };
+    const invalidEmail = { email: '@invalidEmail.com', name: 'test' };
     const expectedError = new Error(
       '생성하려는 이메일 형식이 유효하지 않습니다.',
     );
@@ -35,17 +36,19 @@ describe('UsersService', () => {
   });
 
   it('should return a user with that email', async () => {
-    const existentEmail = 'changeme@test.com';
-    const result1 = {
-      email: 'changeme@test.com',
+    const existentEmail = 'test@existentEmail.com';
+    const expectedResult = {
+      email: 'test@existentEmail.com',
       name: 'john',
     };
-    expect(await service.readUserByEmail(existentEmail)).toEqual(result1);
+    expect(await service.readUserByEmail(existentEmail)).toEqual(
+      expectedResult,
+    );
 
-    const nonExistentEmail = 'test@test.com';
+    const nonExistentEmail = 'test@newEmail.com';
     expect(await service.readUserByEmail(nonExistentEmail)).toEqual(undefined);
 
-    const invalidEmail = '@test.com';
+    const invalidEmail = '@invalidEmail.com';
     const expectedError = new Error(
       '찾으려는 이메일 형식이 유효하지 않습니다.',
     );
@@ -55,5 +58,15 @@ describe('UsersService', () => {
         expect(error).toEqual(expectedError);
       }),
     ).toEqual(undefined);
+  });
+
+  it('should return a user created or read', async () => {
+    const newUser = { email: 'newUser@test.com', name: 'newUser' };
+    expect(await service.readOrCreateUser(newUser)).toEqual(newUser);
+    const existentUser = {
+      email: 'existentUser@test.com',
+      name: 'existentUser',
+    };
+    expect(await service.readOrCreateUser(existentUser)).toEqual(existentUser);
   });
 });
