@@ -16,5 +16,12 @@ describe('UsersController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+    expect(controller.getProfile).toBeDefined();
+    expect(controller.logout).toBeDefined();
+  });
+
+  it('should return a logined user', () => {
+    const loginedUser = { email: 'loginedUser@test.com', name: 'loginedUser' };
+    expect(controller.getProfile(loginedUser)).toEqual(loginedUser);
   });
 });
