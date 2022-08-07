@@ -1,32 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  NotFoundException,
-} from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
-
-@Catch(NotFoundException)
-export class NotFoundExceptionFilter implements ExceptionFilter {
-  catch(exception: NotFoundException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    response.send('not found page');
-  }
-}
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_FILTER,
-      useClass: NotFoundExceptionFilter,
-    },
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    UsersModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
