@@ -17,7 +17,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
-  googleCallback(@User() user: UserType, @Res() res: Response): void {
+  googleCallback(@User() user: UserType, @Res() res: Response): Response {
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
@@ -32,6 +32,8 @@ export class AuthController {
         httpOnly: true,
       })
       .redirect(process.env.AUTH_REDIRECT);
+
+    return res;
   }
 
   @Get('kakao')
@@ -41,7 +43,7 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
-  kakaoCallback(@User() user: UserType, @Res() res: Response): void {
+  kakaoCallback(@User() user: UserType, @Res() res: Response): Response {
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
@@ -56,5 +58,6 @@ export class AuthController {
         httpOnly: true,
       })
       .redirect(process.env.AUTH_REDIRECT);
+    return res;
   }
 }
