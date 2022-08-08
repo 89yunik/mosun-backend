@@ -1,15 +1,22 @@
 import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
-import { User } from 'src/auth/decorators/user.decorator';
+import { UserReq } from 'src/auth/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UsersService, UserType } from './users.service';
+import { User } from './user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  searchUser() {
+    return this.usersService.readUsers();
+  }
+
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getProfile(@User() user: UserType) {
+  getProfile(@UserReq() user: Partial<User>) {
     return user;
   }
 

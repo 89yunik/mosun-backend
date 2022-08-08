@@ -18,7 +18,6 @@ import { UsersModule } from './users/users.module';
       username: process.env.TYPEORM_USERNAME,
       password: process.env.TYPEORM_PASSWORD,
       database: process.env.TYPEORM_DATABASE,
-      // entities: ['entity/*.ts'],
       autoLoadEntities: true,
       synchronize: true,
     }),
