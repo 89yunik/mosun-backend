@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-
-export type UserType = {
-  email: string; //Email type?
-  name: string;
-};
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
 
 const validateEmail = (email: string): boolean => {
   const emailPattern = /\w+@\w+.+\w/;
@@ -12,6 +10,10 @@ const validateEmail = (email: string): boolean => {
 
 @Injectable()
 export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
   private readonly users = [
     {
       email: 'test@existentEmail.com',
@@ -22,21 +24,32 @@ export class UsersService {
       name: 'existentUser',
     },
   ];
-  async createUser(target: UserType): Promise<UserType> {
+  async createUser(target: Partial<User>): Promise<Partial<User>> {
     if (validateEmail(target.email)) {
-      this.users.push(target);
-      const user = this.users[this.users.length - 1];
-      return user;
+      const user = this.usersRepository.create(target);
+      if (user) {
+        await this.usersRepository.save(user);
+        return { email: user.email, name: user.name };
+      } else {
+        const error = new Error('');
+        error.name = '';
+        throw error;
+      }
     } else {
       const error = new Error('생성하려는 이메일 형식이 유효하지 않습니다.');
       error.name = 'Unprocessable Entity';
       throw error;
     }
   }
-  async readUserByEmail(email: string): Promise<UserType | undefined> {
+  async readUsers(name?: string) {
+    return this.usersRepository.find();
+  }
+  async readUserByEmail(email: string): Promise<Partial<User> | undefined> {
     if (validateEmail(email)) {
-      const user = this.users.find((user) => user.email === email);
-      return user;
+      const user = await this.usersRepository.findOneBy({ email });
+      if (user) {
+        return { email: user.email, name: user.name };
+      }
     } else {
       const error = new Error('찾으려는 이메일 형식이 유효하지 않습니다.');
       error.name = 'Unprocessable Entity';
@@ -44,7 +57,7 @@ export class UsersService {
     }
   }
 
-  async readOrCreateUser(target: UserType): Promise<UserType> {
+  async readOrCreateUser(target: Partial<User>): Promise<Partial<User>> {
     let user = await this.readUserByEmail(target.email);
     if (!user) {
       console.log('회원가입');
