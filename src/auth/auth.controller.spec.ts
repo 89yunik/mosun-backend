@@ -1,17 +1,28 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { createResponse } from 'node-mocks-http';
+import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { mockRepository } from 'src/users/users.service.spec';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService, UsersService, JwtService],
+      providers: [
+        AuthService,
+        UsersService,
+        JwtService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);

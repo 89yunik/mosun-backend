@@ -2,14 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { createResponse } from 'node-mocks-http';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { mockRepository } from './users.service.spec';
 
 describe('UsersController', () => {
   let controller: UsersController;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
-      providers: [UsersService],
+      providers: [
+        UsersService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+      ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);

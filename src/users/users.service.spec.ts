@@ -1,12 +1,36 @@
+import { targetModulesByContainer } from '@nestjs/core/router/router-module';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './user.entity';
 import { UsersService } from './users.service';
+
+const users = [
+  {
+    email: 'test@existentEmail.com',
+    name: 'john',
+  },
+  {
+    email: 'existentUser@test.com',
+    name: 'existentUser',
+  },
+];
+export const mockRepository = {
+  create: jest.fn((target) => target),
+  save: jest.fn(),
+  findOneBy: jest.fn(({ email }) => users.find((user) => user.email === email)),
+};
 
 describe('UsersService', () => {
   let service: UsersService;
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService],
+      providers: [
+        UsersService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
