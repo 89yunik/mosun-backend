@@ -8,6 +8,7 @@ const users = [
   {
     email: 'test@existentEmail.com',
     name: 'john',
+    refreshToken: 'profileTest',
   },
   {
     email: 'existentUser@test.com',
@@ -17,7 +18,13 @@ const users = [
 export const mockRepository = {
   create: jest.fn((target) => target),
   save: jest.fn(),
-  findOneBy: jest.fn(({ email }) => users.find((user) => user.email === email)),
+  findOneBy: jest.fn((target) => {
+    if (target.email) {
+      return users.find((user) => user.email === target.email);
+    } else if (target.refreshToken) {
+      return users.find((user) => user.refreshToken === target.refreshToken);
+    }
+  }),
   update: jest.fn((target, update) => {
     const user = users.find((user) => user.email === target.email);
     return { ...user, ...update };

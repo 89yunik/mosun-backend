@@ -26,7 +26,6 @@ export class UsersController {
   @Get('logout')
   @UseGuards(JwtAuthGuard)
   logout(@Res() res: Response): Response {
-    res.clearCookie('accessToken');
     res.clearCookie('refreshToken').redirect(process.env.AUTH_REDIRECT);
     return res;
   }
