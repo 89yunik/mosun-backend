@@ -1,14 +1,18 @@
-import { Controller, Get, UseGuards, HttpCode, Res } from '@nestjs/common';
+import { Controller, Get, UseGuards, HttpCode, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { UserReq } from './decorators/user.decorator';
 import { Response } from 'express';
-import { User } from 'src/users/user.entity';
+// import { User } from 'src/users/user.entity';
+import { UsersService } from 'src/users/users.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -17,25 +21,17 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
-  googleCallback(
-    @UserReq() user: Partial<User>,
-    @Res() res: Response,
-  ): Response {
-    const accessExp = Number(process.env.JWT_ACCESS_EXP);
+  googleCallback(@Req() req: any, @Res() res: Response): Response {
+    const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
-    res.cookie('accessToken', accessToken, {
-      maxAge: accessExp * 60 * 1000,
+    this.usersService.updateUser(user, { refreshToken });
+    res.cookie('refreshToken', refreshToken, {
+      maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
     });
-    res
-      .cookie('refreshToken', refreshToken, {
-        maxAge: refreshExp * 60 * 60 * 1000,
-        httpOnly: true,
-      })
-      .redirect(process.env.AUTH_REDIRECT);
-
+    res.json({ accessToken }).redirect(process.env.AUTH_REDIRECT);
     return res;
   }
 
@@ -46,24 +42,28 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
-  kakaoCallback(
-    @UserReq() user: Partial<User>,
-    @Res() res: Response,
-  ): Response {
-    const accessExp = Number(process.env.JWT_ACCESS_EXP);
+  kakaoCallback(@Req() req: any, @Res() res: Response): Response {
+    const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
-    res.cookie('accessToken', accessToken, {
-      maxAge: accessExp * 60 * 1000,
+    this.usersService.updateUser(user, { refreshToken });
+    res.cookie('refreshToken', refreshToken, {
+      maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
     });
-    res
-      .cookie('refreshToken', refreshToken, {
-        maxAge: refreshExp * 60 * 60 * 1000,
-        httpOnly: true,
-      })
-      .redirect(process.env.AUTH_REDIRECT);
+    res.json({ accessToken }).redirect(process.env.AUTH_REDIRECT);
     return res;
+  }
+
+  @Get('accessToken')
+  @UseGuards(JwtAuthGuard)
+  async getAccessToken(@Req() req) {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      const user = await this.usersService.readUser({ refreshToken });
+      const accessToken = this.authService.setToken('access', user);
+      return { accessToken };
+    }
   }
 }
