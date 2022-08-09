@@ -1,8 +1,7 @@
-import { Controller, Get, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
-import { UserReq } from 'src/auth/decorators/user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from './user.entity';
+// import { User } from './user.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -16,8 +15,12 @@ export class UsersController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getProfile(@UserReq() user: Partial<User>) {
-    return user;
+  async getProfile(@Req() req) {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      const user = await this.usersService.readUser({ refreshToken });
+      return user;
+    }
   }
 
   @Get('logout')
