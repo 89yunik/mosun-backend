@@ -14,16 +14,6 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
-  private readonly users = [
-    {
-      email: 'test@existentEmail.com',
-      name: 'john',
-    },
-    {
-      email: 'existentUser@test.com',
-      name: 'existentUser',
-    },
-  ];
   async createUser(target: Partial<User>): Promise<Partial<User>> {
     if (validateEmail(target.email)) {
       const user = this.usersRepository.create(target);
