@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
-
-export type UserType = {
-  email: string; //Email type?
-  name: string;
-};
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { User } from './user.entity';
 
 const validateEmail = (email: string): boolean => {
   const emailPattern = /\w+@\w+.+\w/;
@@ -12,44 +14,75 @@ const validateEmail = (email: string): boolean => {
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      email: 'test@existentEmail.com',
-      name: 'john',
-    },
-    {
-      email: 'existentUser@test.com',
-      name: 'existentUser',
-    },
-  ];
-  async createUser(target: UserType): Promise<UserType> {
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
+  async createUser(target: Partial<User>): Promise<Partial<User>> {
     if (validateEmail(target.email)) {
-      this.users.push(target);
-      const user = this.users[this.users.length - 1];
-      return user;
+      const user = this.usersRepository.create(target);
+      if (user) {
+        await this.usersRepository.save(user);
+        return { email: user.email, name: user.name };
+      } else {
+        throw new BadRequestException(
+          '생성하려는 계정의 필수 입력값을 확인해 주십시오.',
+        );
+      }
     } else {
-      const error = new Error('생성하려는 이메일 형식이 유효하지 않습니다.');
-      error.name = 'Unprocessable Entity';
-      throw error;
+      throw new UnprocessableEntityException(
+        '생성하려는 이메일 형식이 유효하지 않습니다.',
+      );
     }
   }
-  async readUserByEmail(email: string): Promise<UserType | undefined> {
-    if (validateEmail(email)) {
-      const user = this.users.find((user) => user.email === email);
-      return user;
-    } else {
-      const error = new Error('찾으려는 이메일 형식이 유효하지 않습니다.');
-      error.name = 'Unprocessable Entity';
-      throw error;
-    }
+  async readUsers(name?: string) {
+    return this.usersRepository.find();
   }
 
-  async readOrCreateUser(target: UserType): Promise<UserType> {
-    let user = await this.readUserByEmail(target.email);
+  async readUser(options: Partial<User>): Promise<Partial<User> | undefined> {
+    if (options.email) {
+      if (validateEmail(options.email)) {
+        const user = await this.usersRepository.findOneBy(options);
+        if (user) {
+          return { email: user.email, name: user.name };
+        }
+      } else {
+        throw new UnprocessableEntityException(
+          '찾으려는 이메일 형식이 유효하지 않습니다.',
+        );
+      }
+    } else {
+      const user = await this.usersRepository.findOneBy(options);
+      if (user) {
+        return { email: user.email, name: user.name };
+      }
+    }
+  }
+  // async readUserByEmail(email: string): Promise<Partial<User> | undefined> {
+  //   if (validateEmail(email)) {
+  //     const user = await this.usersRepository.findOneBy({ email });
+  //     if (user) {
+  //       return { email: user.email, name: user.name };
+  //     }
+  //   } else {
+  //     throw new UnprocessableEntityException(
+  //       '찾으려는 이메일 형식이 유효하지 않습니다.',
+  //     );
+  //   }
+  // }
+
+  async readOrCreateUser(target: Partial<User>): Promise<Partial<User>> {
+    let user = await this.readUser(target);
     if (!user) {
       console.log('회원가입');
       user = await this.createUser(target);
     }
     return user;
+  }
+  async updateUser(
+    target: Partial<User>,
+    update: Partial<User>,
+  ): Promise<void> {
+    await this.usersRepository.update(target, update);
   }
 }
