@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
 declare global {
   namespace Express {
@@ -14,6 +15,7 @@ declare global {
     }
   }
 }
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
