@@ -17,8 +17,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     accessToken: string,
     refreshToken: string,
     profile: any,
-    done: any,
-  ): Promise<any> {
+    done: Function,
+  ): Promise<void> {
     const email = profile._json.kakao_account.email;
     const name = profile._json.properties.nickname;
     try {

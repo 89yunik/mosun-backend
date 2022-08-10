@@ -2,11 +2,18 @@ import { Controller, Get, UseGuards, HttpCode, Res, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { Response } from 'express';
-// import { User } from 'src/users/user.entity';
+import { Request, Response } from 'express';
+import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
+declare global {
+  namespace Express {
+    interface Request {
+      user: Partial<User>;
+    }
+  }
+}
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -21,7 +28,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
-  googleCallback(@Req() req: any, @Res() res: Response): Response {
+  googleCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
@@ -42,7 +49,7 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
-  kakaoCallback(@Req() req: any, @Res() res: Response): Response {
+  kakaoCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
