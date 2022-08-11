@@ -56,17 +56,6 @@ describe('UsersService', () => {
   it('should return a created user', async () => {
     const validEmail = { email: 'test@validEmail.com', name: 'test' };
     expect(await service.createUser(validEmail)).toEqual(validEmail);
-
-    // const invalidEmail = { email: '@invalidEmail.com', name: 'test' };
-    // const expectedError = new Error(
-    //   '생성하려는 이메일 형식이 유효하지 않습니다.',
-    // );
-    // expectedError.name = 'Unprocessable Entity';
-    // expect(
-    //   await service.createUser(invalidEmail).catch((error) => {
-    //     expect(error).toEqual(expectedError);
-    //   }),
-    // ).toEqual(undefined);
   });
 
   it('should return a user with that email', async () => {
@@ -79,21 +68,10 @@ describe('UsersService', () => {
       expectedResult,
     );
 
-    // const nonExistentEmail = 'test@newEmail.com';
-    // expect(await service.readUser({ email: nonExistentEmail })).toEqual(
-    //   undefined,
-    // );
-
-    // const invalidEmail = '@invalidEmail.com';
-    // const expectedError = new Error(
-    //   '찾으려는 이메일 형식이 유효하지 않습니다.',
-    // );
-    // expectedError.name = 'Unprocessable Entity';
-    // expect(
-    //   await service.readUser({ email: invalidEmail }).catch((error) => {
-    //     expect(error).toEqual(expectedError);
-    //   }),
-    // ).toEqual(undefined);
+    const nonExistentEmail = 'test@newEmail.com';
+    expect(await service.readUser({ email: nonExistentEmail })).toEqual(
+      undefined,
+    );
   });
 
   it('should return a user created or read', async () => {
