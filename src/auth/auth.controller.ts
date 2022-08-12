@@ -6,7 +6,12 @@ import { Request, Response } from 'express';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 declare global {
   namespace Express {
@@ -14,6 +19,11 @@ declare global {
       user: Partial<User>;
     }
   }
+}
+
+class AccessToken {
+  @ApiProperty()
+  accessToken: string;
 }
 @ApiTags('Auth')
 @Controller('auth')
@@ -23,10 +33,21 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+  @ApiOperation({
+    summary: '구글 로그인 API',
+    description:
+      '구글 로그인 창을 불러온다. 로그인에 성공하면 google/callback으로 이동한다.',
+  })
+  @ApiResponse({ status: 200 })
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   googleLogin(): void {}
 
+  @ApiOperation({
+    summary: '구글 로그인 콜백 API',
+    description: '로그인된 사용자 정보로 쿠키를 생성한다.',
+  })
+  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
@@ -40,14 +61,25 @@ export class AuthController {
       maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
     });
-    res.json({ accessToken }).redirect(process.env.AUTH_REDIRECT);
+    res.json({ accessToken });
     return res;
   }
 
+  @ApiOperation({
+    summary: '카카오 로그인 API',
+    description:
+      '카카오 로그인 창을 불러온다. 로그인에 성공하면 kakao/callback으로 이동한다.',
+  })
+  @ApiResponse({ status: 200 })
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
   kakaoLogin(): void {}
 
+  @ApiOperation({
+    summary: '카카오 로그인 콜백 API',
+    description: '로그인된 사용자 정보로 쿠키를 생성한다.',
+  })
+  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
@@ -61,10 +93,15 @@ export class AuthController {
       maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
     });
-    res.json({ accessToken }).redirect(process.env.AUTH_REDIRECT);
+    res.json({ accessToken });
     return res;
   }
 
+  @ApiOperation({
+    summary: 'accessToken 재발급 API',
+    description: '토큰을 재발급한다.',
+  })
+  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('accessToken')
   @UseGuards(JwtAuthGuard)
   async getAccessToken(@Req() req) {
