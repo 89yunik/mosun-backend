@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UsersModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.TYPEORM_HOST,
@@ -21,6 +19,8 @@ import { UsersModule } from './users/users.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
