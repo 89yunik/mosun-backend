@@ -25,7 +25,7 @@ jobs:
       run: |
           touch .env
           echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
-          echo JWT_ACCESS_EXP=${{ secrets.JWT_ACESS_EXP }} >> .env
+          echo JWT_ACCESS_EXP=${{ secrets.JWT_ACCESS_EXP }} >> .env
           cat .env
     - run: npm ci
     - run: npm test
