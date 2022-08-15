@@ -1,17 +1,28 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { createResponse } from 'node-mocks-http';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { createRequest, createResponse } from 'node-mocks-http';
+import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { mockRepository } from 'src/users/users.service.spec';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService, UsersService, JwtService],
+      providers: [
+        AuthService,
+        UsersService,
+        JwtService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockRepository,
+        },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -26,17 +37,11 @@ describe('AuthController', () => {
   });
 
   it('should create jwt tokens', () => {
-    const googleUser = { email: 'test@google.com', name: 'test' };
-    const kakaoUser = { email: 'test@kakao.com', name: 'test' };
+    const req = createRequest();
+
     const res = createResponse();
     const expectedResult = {
       cookies: {
-        accessToken: {
-          options: {
-            httpOnly: true,
-            maxAge: Number(process.env.JWT_ACCESS_EXP) * 60 * 1000,
-          },
-        },
         refreshToken: {
           options: {
             httpOnly: true,
@@ -45,11 +50,9 @@ describe('AuthController', () => {
         },
       },
     };
-    expect(controller.googleCallback(googleUser, res)).toMatchObject(
-      expectedResult,
-    );
-    expect(controller.kakaoCallback(kakaoUser, res)).toMatchObject(
-      expectedResult,
-    );
+    req.user = { email: 'test@google.com', name: 'test' };
+    expect(controller.googleCallback(req, res)).toMatchObject(expectedResult);
+    req.user = { email: 'test@kakao.com', name: 'test' };
+    expect(controller.kakaoCallback(req, res)).toMatchObject(expectedResult);
   });
 });

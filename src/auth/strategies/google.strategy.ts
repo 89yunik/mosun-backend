@@ -19,7 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     refreshToken: string,
     profile: typeof Profile,
     done: typeof VerifyCallback,
-  ): Promise<any> {
+  ): Promise<void> {
     const { email, name } = profile._json;
     try {
       const user = await this.usersService.readOrCreateUser({ email, name });
