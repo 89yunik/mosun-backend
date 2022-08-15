@@ -21,5 +21,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - name: Create env file
+      run: |
+          touch .env
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+          echo JWT_ACCESS_EXP=${{ secrets.JWT_ACESS_EXP }} >> .env
+          cat .env
     - run: npm ci
     - run: npm test
