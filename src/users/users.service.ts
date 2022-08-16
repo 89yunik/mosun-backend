@@ -12,16 +12,16 @@ export class UsersService {
   ) {}
   async createUser(target: CreateUserDto): Promise<Partial<User>> {
     const user = this.usersRepository.create(target);
-    if (user) {
-      await this.usersRepository.save(user);
-      return { email: user.email, name: user.name };
-    } else {
-      throw new BadRequestException(
-        '생성하려는 계정의 필수 입력값을 확인해 주십시오.',
-      );
-    }
+    // if (user) {
+    await this.usersRepository.save(user);
+    return { email: user.email, name: user.name };
+    // } else {
+    //   throw new BadRequestException(
+    //     '생성하려는 계정의 필수 입력값을 확인해 주십시오.',
+    //   );
+    // }
   }
-  async readUsers(name?: string) {
+  async readUsers(name?: string): Promise<User[]> {
     return this.usersRepository.find();
   }
 
@@ -47,7 +47,7 @@ export class UsersService {
     await this.usersRepository.update(target, update);
   }
 
-  async deleteUser(target: Partial<User>) {
+  async deleteUser(target: Partial<User>): Promise<void> {
     await this.usersRepository.delete(target);
   }
 }
