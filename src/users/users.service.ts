@@ -26,16 +26,9 @@ export class UsersService {
   }
 
   async readUser(options: Partial<User>): Promise<Partial<User> | undefined> {
-    if (options.email) {
-      const user = await this.usersRepository.findOneBy(options);
-      if (user) {
-        return { email: user.email, name: user.name };
-      }
-    } else {
-      const user = await this.usersRepository.findOneBy(options);
-      if (user) {
-        return { email: user.email, name: user.name };
-      }
+    const user = await this.usersRepository.findOneBy(options);
+    if (user) {
+      return { email: user.email, name: user.name };
     }
   }
 
