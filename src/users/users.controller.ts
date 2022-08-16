@@ -31,7 +31,9 @@ export class UsersController {
   async getProfile(@Req() req) {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
-      const user = await this.usersService.readUser({ refreshToken });
+      const user = await this.usersService.readUser({
+        refresh_token: refreshToken,
+      });
       return user;
     }
   }

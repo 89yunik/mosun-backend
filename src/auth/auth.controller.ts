@@ -56,7 +56,7 @@ export class AuthController {
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
-    this.usersService.updateUser(user, { refreshToken });
+    this.usersService.updateUser(user, { refresh_token: refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
@@ -88,7 +88,7 @@ export class AuthController {
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
-    this.usersService.updateUser(user, { refreshToken });
+    this.usersService.updateUser(user, { refresh_token: refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
       httpOnly: true,
@@ -107,7 +107,9 @@ export class AuthController {
   async getAccessToken(@Req() req) {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
-      const user = await this.usersService.readUser({ refreshToken });
+      const user = await this.usersService.readUser({
+        refresh_token: refreshToken,
+      });
       const accessToken = this.authService.setToken('access', user);
       return { accessToken };
     }
