@@ -54,14 +54,24 @@ export class AuthController {
   googleCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
+    const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refresh_token: refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
+      sameSite: 'strict',
       httpOnly: true,
+      secure: true,
     });
-    res.json({ accessToken });
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: accessExp * 60 * 1000,
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: true,
+      })
+      .redirect(process.env.AUTH_REDIRECT);
     return res;
   }
 
@@ -86,14 +96,24 @@ export class AuthController {
   kakaoCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
+    const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refresh_token: refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
+      sameSite: 'strict',
       httpOnly: true,
+      secure: true,
     });
-    res.json({ accessToken });
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: accessExp * 60 * 1000,
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: true,
+      })
+      .redirect(process.env.AUTH_REDIRECT);
     return res;
   }
 
@@ -103,15 +123,23 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('accessToken')
-  @UseGuards(JwtAuthGuard)
-  async getAccessToken(@Req() req) {
+  // @UseGuards(JwtAuthGuard)
+  async getAccessToken(@Req() req, @Res() res) {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
+      const accessExp = Number(process.env.JWT_ACCESS_EXP);
       const user = await this.usersService.readUser({
         refresh_token: refreshToken,
       });
       const accessToken = this.authService.setToken('access', user);
-      return { accessToken };
+      res
+        .cookie('accessToken', accessToken, {
+          maxAge: accessExp * 60 * 1000,
+          sameSite: 'strict',
+          httpOnly: true,
+          secure: true,
+        })
+        .redirect(process.env.AUTH_REDIRECT);
     }
   }
 }
