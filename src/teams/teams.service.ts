@@ -3,13 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTeamDto } from './dtos/create-team.dto';
 import { Team } from './team.entity';
-// import { GroupUser } from './group_user.entity';
 
 @Injectable()
 export class TeamsService {
   constructor(
     @InjectRepository(Team)
-    private teamsRepository: Repository<Team>, // @InjectRepository(GroupUser) // private groupUsersRepository: Repository<GroupUser>,
+    private teamsRepository: Repository<Team>, // @InjectRepository(TeamUser) // private teamUsersRepository: Repository<TeamUser>,
   ) {}
   async createTeamOfUser(
     target: CreateTeamDto,
@@ -17,15 +16,15 @@ export class TeamsService {
   ): Promise<Partial<Team>> {
     const team = this.teamsRepository.create(target);
     await this.teamsRepository.save(team);
-    // const groupUser = this.groupUsersRepository.create({
-    //   group_id: group.id,
+    // const teamUser = this.teamUsersRepository.create({
+    //   team_id: team.id,
     //   user_id: userId,
     //   authority: 'admin',
     // });
-    // await this.groupUsersRepository.save(groupUser);
+    // await this.teamUsersRepository.save(teamUser);
     return { name: team.name };
   }
-  //   async readGroupsOfUser(userId: number): Promise<void> {}
-  //   async updateGroupOfUser(userId: number): Promise<void> {}
-  //   async deleteGroupOfUser(userId: number): Promise<void> {}
+  //   async readTeamsOfUser(userId: number): Promise<void> {}
+  //   async updateTeamOfUser(userId: number): Promise<void> {}
+  //   async deleteTeamOfUser(userId: number): Promise<void> {}
 }
