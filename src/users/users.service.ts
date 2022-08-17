@@ -14,7 +14,7 @@ export class UsersService {
     const user = this.usersRepository.create(target);
     // if (user) {
     await this.usersRepository.save(user);
-    return { email: user.email, name: user.name };
+    return { id: user.id, email: user.email, name: user.name };
     // } else {
     //   throw new BadRequestException(
     //     '생성하려는 계정의 필수 입력값을 확인해 주십시오.',
@@ -28,7 +28,7 @@ export class UsersService {
   async readUser(options: Partial<User>): Promise<Partial<User> | undefined> {
     const user = await this.usersRepository.findOneBy(options);
     if (user) {
-      return { email: user.email, name: user.name };
+      return { id: user.id, email: user.email, name: user.name };
     }
   }
 
