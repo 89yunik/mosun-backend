@@ -15,5 +15,5 @@ export class User {
   name: string;
 
   @Column({ type: 'varchar', nullable: true })
-  refresh_token: string;
+  refreshToken: string;
 }

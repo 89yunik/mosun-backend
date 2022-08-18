@@ -29,13 +29,6 @@ export class UsersController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req) {
-    // const refreshToken = req.cookies.refreshToken;
-    // if (refreshToken) {
-    //   const user = await this.usersService.readUser({
-    //     refresh_token: refreshToken,
-    //   });
-    //   return user;
-    // }
     const { email, name } = req.user;
     return { email, name };
   }
