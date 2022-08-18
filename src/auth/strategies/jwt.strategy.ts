@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: process.env.JWT_SECRET,
     });
   }
-  validate(user: Partial<User>, done: Function) {
+  validate(user: User, done: Function) {
     done(null, user);
   }
 }
