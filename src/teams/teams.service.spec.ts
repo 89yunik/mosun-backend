@@ -11,17 +11,6 @@ const mockTeamsRepository = {
     teams.push(target);
     return target;
   }),
-  // findOneBy: jest.fn((target) => {
-  //   if (target.email) {
-  //     return teams.find((user) => user.email === target.email);
-  //   } else if (target.refresh_token) {
-  //     return teams.find((user) => user.refresh_token === target.refresh_token);
-  //   }
-  // }),
-  // update: jest.fn((target, update) => {
-  //   const user = teams.find((user) => user.email === target.email);
-  //   return { ...user, ...update };
-  // }),
 };
 
 describe('TeamsService', () => {
