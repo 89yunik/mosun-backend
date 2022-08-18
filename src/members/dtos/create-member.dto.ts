@@ -5,11 +5,11 @@ export class CreateMemberDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  team: number;
+  teamId: number;
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  user: number;
+  userId: number;
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

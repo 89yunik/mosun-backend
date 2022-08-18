@@ -14,13 +14,19 @@ export class Member {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty()
+  @Column({ name: 'teamId' })
+  teamId: number;
   @ManyToOne(() => Team)
-  @JoinColumn()
-  team: Team;
+  @JoinColumn({ name: 'teamId' })
+  team: Team['id'];
 
+  @ApiProperty()
+  @Column({ name: 'userId' })
+  userId: number;
   @ManyToOne(() => User)
-  @JoinColumn()
-  user: User;
+  @JoinColumn({ name: 'userId' })
+  user: User['id'];
 
   @ApiProperty()
   @Column({ type: 'varchar', length: 10 })
