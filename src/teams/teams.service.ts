@@ -8,7 +8,7 @@ import { Team } from './team.entity';
 export class TeamsService {
   constructor(
     @InjectRepository(Team)
-    private teamsRepository: Repository<Team>, // @InjectRepository(TeamUser) // private teamUsersRepository: Repository<TeamUser>,
+    private teamsRepository: Repository<Team>,
   ) {}
   async createTeamOfUser(
     target: CreateTeamDto,
