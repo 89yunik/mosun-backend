@@ -17,7 +17,7 @@ export class MembersController {
   @Post()
   @UseGuards(JwtAuthGuard)
   createMember(@Req() req: Request) {
-    const memberInfo = req.body;
-    this.membersService.createMember(memberInfo);
+    const newMemberInfo = req.body;
+    this.membersService.createMember(newMemberInfo);
   }
 }
