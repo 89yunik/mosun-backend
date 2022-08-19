@@ -140,4 +140,17 @@ export class AuthController {
         .redirect(process.env.AUTH_REDIRECT);
     }
   }
+
+  @ApiOperation({
+    summary: '로그아웃 API',
+    description: '사용자를 로그아웃한다.',
+  })
+  @ApiResponse({ status: 200 })
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Res() res: Response): Response {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken').redirect(process.env.AUTH_REDIRECT);
+    return res;
+  }
 }
