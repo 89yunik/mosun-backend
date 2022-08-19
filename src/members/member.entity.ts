@@ -17,14 +17,22 @@ export class Member {
   @ApiProperty()
   @Column({ name: 'teamId' })
   teamId: number;
-  @ManyToOne(() => Team)
+  @ManyToOne(() => Team, (team) => team.id, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'teamId' })
-  team: Team['id'];
+  team: Team;
 
   @ApiProperty()
   @Column({ name: 'userId' })
   userId: number;
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.id, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: User['id'];
 
