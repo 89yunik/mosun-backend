@@ -15,7 +15,7 @@ export class UsersController {
   })
   @ApiParam({ name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: User, isArray: true })
-  @Get('search')
+  @Get()
   @UseGuards(JwtAuthGuard)
   searchUsers(@Param() param) {
     return this.usersService.readUsers(param.keyword);
@@ -31,18 +31,5 @@ export class UsersController {
   async getProfile(@Req() req) {
     const { email, name } = req.user;
     return { email, name };
-  }
-
-  @ApiOperation({
-    summary: '로그아웃 API',
-    description: '사용자를 로그아웃한다.',
-  })
-  @ApiResponse({ status: 200 })
-  @Get('logout')
-  @UseGuards(JwtAuthGuard)
-  logout(@Res() res: Response): Response {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken').redirect(process.env.AUTH_REDIRECT);
-    return res;
   }
 }
