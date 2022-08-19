@@ -10,12 +10,27 @@ export class MembersService {
     @InjectRepository(Member)
     private membersRepository: Repository<Member>,
   ) {}
-  async createMember(newMemberInfo: CreateMemberDto): Promise<void> {
-    const member = this.membersRepository.create(newMemberInfo);
+  async createMember(memberInfo: CreateMemberDto): Promise<Member> {
+    const member = this.membersRepository.create(memberInfo);
     await this.membersRepository.save(member);
+    return member;
   }
 
   readMembers(options: Partial<Member>): Promise<Member[]> {
     return this.membersRepository.findBy(options);
+  }
+
+  readMember(options: Partial<Member>): Promise<Member> {
+    return this.membersRepository.findOneBy(options);
+  }
+  async updateMember(
+    target: Partial<Member>,
+    update: Partial<Member>,
+  ): Promise<void> {
+    await this.membersRepository.update(target, update);
+  }
+
+  async deleteMember(target: Partial<Member>): Promise<void> {
+    await this.membersRepository.delete(target);
   }
 }
