@@ -15,7 +15,7 @@ export class UsersService {
     await this.usersRepository.save(user);
     return user;
   }
-  async readUsers(name?: string): Promise<User[]> {
+  async readUsers(options?: Partial<User>): Promise<User[]> {
     return this.usersRepository.find();
   }
 
