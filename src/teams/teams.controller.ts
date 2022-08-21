@@ -4,7 +4,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
   Post,
   Put,
   Req,
@@ -19,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Member } from 'src/members/member.entity';
 import { MembersService } from 'src/members/members.service';
 import { CreateTeamDto } from './dtos/create-team.dto';
 import { Team } from './team.entity';
@@ -65,21 +65,21 @@ export class TeamsController {
     summary: '팀 수정 API',
     description: '사용자가 관리하는 팀 정보를 수정한다.',
   })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'teamId' })
   @ApiBody({ type: Team })
   @ApiResponse({ status: 200 })
-  @Put(':id')
+  @Put(':teamId')
   @UseGuards(JwtAuthGuard)
-  async updateTeam(@Param() param, @Req() req) {
-    const teamId = Number(param.id);
+  async updateTeam(@Req() req) {
+    const teamId = Number(req.params.teamId);
     const userId = req.user.id;
-    const update = req.body;
-    const member = await this.membersService.readMember({
+    const admin = await this.membersService.readMember({
       userId,
       teamId,
     });
-    if (member) {
-      if (member.authority === 'admin') {
+    if (admin) {
+      if (admin.authority === 'admin') {
+        const update = req.body;
         this.teamsService.updateTeam({ id: teamId }, update);
       } else {
         throw new HttpException(
@@ -99,19 +99,19 @@ export class TeamsController {
     summary: '팀 삭제 API',
     description: '사용자가 관리하는 팀을 삭제한다.',
   })
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Delete(':id')
+  @Delete(':teamId')
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Param() param, @Req() req) {
-    const teamId = Number(param.id);
+  async deleteTeam(@Req() req) {
+    const teamId = Number(req.params.teamId);
     const userId = req.user.id;
-    const member = await this.membersService.readMember({
+    const admin = await this.membersService.readMember({
       userId,
       teamId,
     });
-    if (member) {
-      if (member.authority === 'admin') {
+    if (admin) {
+      if (admin.authority === 'admin') {
         this.teamsService.deleteTeam({ id: teamId });
       } else {
         throw new HttpException(
@@ -125,5 +125,19 @@ export class TeamsController {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  @ApiOperation({
+    summary: '소속팀 조회 API',
+    description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
+  })
+  @ApiResponse({ status: 200, type: Member })
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async readMembersOfUser(@Req() req: Request): Promise<Member[]> {
+    const members = await this.membersService.readMembers({
+      userId: req.user.id,
+    });
+    return members;
   }
 }
