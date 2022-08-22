@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -10,36 +10,21 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
-  async createUser(target: CreateUserDto): Promise<Partial<User>> {
+  async createUser(target: CreateUserDto): Promise<User> {
     const user = this.usersRepository.create(target);
-    if (user) {
-      await this.usersRepository.save(user);
-      return { email: user.email, name: user.name };
-    } else {
-      throw new BadRequestException(
-        '생성하려는 계정의 필수 입력값을 확인해 주십시오.',
-      );
-    }
+    await this.usersRepository.save(user);
+    return user;
   }
-  async readUsers(name?: string) {
-    return this.usersRepository.find();
+  async readUsers(options?: Partial<User>): Promise<User[]> {
+    return this.usersRepository.findBy(options);
   }
 
-  async readUser(options: Partial<User>): Promise<Partial<User> | undefined> {
-    if (options.email) {
-      const user = await this.usersRepository.findOneBy(options);
-      if (user) {
-        return { email: user.email, name: user.name };
-      }
-    } else {
-      const user = await this.usersRepository.findOneBy(options);
-      if (user) {
-        return { email: user.email, name: user.name };
-      }
-    }
+  async readUser(options: Partial<User>): Promise<User> {
+    const user = await this.usersRepository.findOneBy(options);
+    return user;
   }
 
-  async readOrCreateUser(target: CreateUserDto): Promise<Partial<User>> {
+  async readOrCreateUser(target: CreateUserDto): Promise<User> {
     let user = await this.readUser(target);
     if (!user) {
       console.log('회원가입');
@@ -54,7 +39,7 @@ export class UsersService {
     await this.usersRepository.update(target, update);
   }
 
-  async deleteUser(target: Partial<User>) {
+  async deleteUser(target: Partial<User>): Promise<void> {
     await this.usersRepository.delete(target);
   }
 }
