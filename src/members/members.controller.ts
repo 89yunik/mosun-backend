@@ -4,7 +4,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
   Post,
   Put,
   Req,
@@ -27,26 +26,20 @@ import { MembersService } from './members.service';
 @Controller('teams/:teamId/members')
 export class MembersController {
   constructor(private membersService: MembersService) {}
-  @ApiOperation({
-    summary: '팀원 생성 API',
-    description: '',
-  })
-  @ApiParam({ name: 'userId' })
+
+  @ApiOperation({ summary: '팀원 가입 API', description: '팀에 가입한다.' })
   @ApiParam({ name: 'teamId' })
-  @ApiBody({ type: CreateMemberDto, required: true })
-  @ApiResponse({ status: 200, type: Member })
-  @Post('users/:userId')
+  @ApiResponse({ status: 200 })
+  @Post()
   @UseGuards(JwtAuthGuard)
-  createMember(@Req() req: Request): Promise<Member> {
-    const teamId = Number(req.params.teamId);
-    const userId = Number(req.params.userId);
-    const memberInfo = req.body;
-    const member = this.membersService.createMember({
+  async createUserMember(@Req() req): Promise<void> {
+    const teamId = req.params.teamId;
+    const userId = req.user.id;
+    await this.membersService.createMember({
       teamId,
       userId,
-      ...memberInfo,
+      authority: 'user',
     });
-    return member;
   }
 
   @ApiOperation({
@@ -55,7 +48,7 @@ export class MembersController {
   })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200, type: Member, isArray: true })
-  @Get('users')
+  @Get()
   @UseGuards(JwtAuthGuard)
   readMembers(@Req() req: Request): Promise<Member[]> {
     const teamId = Number(req.params.teamId);
@@ -63,8 +56,60 @@ export class MembersController {
     return this.membersService.readMembers({ teamId, ...memberInfo });
   }
 
+  @ApiOperation({ summary: '팀원 탈퇴 API', description: '팀에서 탈퇴한다.' })
+  @ApiParam({ name: 'teamId' })
+  @ApiResponse({ status: 200 })
+  @Delete()
+  deleteUserMember(@Req() req) {
+    const teamId = req.params.teamId;
+    const userId = req.user.id;
+    this.membersService.deleteMember({ teamId, userId });
+  }
+
+  //팀 관리자 API
   @ApiOperation({
-    summary: '팀원 수정 API',
+    summary: '(팀 관리자)팀원 추가 API',
+    description:
+      'teamId와 userId를 parameter로, 팀원 정보를 body로 받아 팀원을 추가한다.',
+  })
+  @ApiParam({ name: 'userId' })
+  @ApiParam({ name: 'teamId' })
+  @ApiBody({ type: CreateMemberDto, required: true })
+  @ApiResponse({ status: 200 })
+  @Post(':userId')
+  @UseGuards(JwtAuthGuard)
+  async createMember(@Req() req: Request): Promise<void> {
+    const teamId = Number(req.params.teamId);
+    const adminId = req.user.id;
+    const admin = await this.membersService.readMember({
+      userId: adminId,
+      teamId,
+    });
+    if (admin) {
+      if (admin.authority === 'admin') {
+        const memberInfo = req.body;
+        const userId = Number(req.params.userId);
+        await this.membersService.createMember({
+          teamId,
+          userId,
+          ...memberInfo,
+        });
+      } else {
+        throw new HttpException(
+          '사용자에게 팀원 추가 권한이 없습니다.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    } else {
+      throw new HttpException(
+        '사용자가 추가하려는 팀의 팀원이 아닙니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @ApiOperation({
+    summary: '(팀 관리자)팀원 수정 API',
     description: '사용자가 관리하는 팀의 팀원 권한을 수정한다.',
   })
   @ApiParam({ name: 'memberId' })
@@ -73,7 +118,7 @@ export class MembersController {
   @ApiResponse({ status: 200 })
   @Put(':memberId')
   @UseGuards(JwtAuthGuard)
-  async updateMember(@Req() req) {
+  async updateMember(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
     const userId = req.user.id;
     const admin = await this.membersService.readMember({
@@ -83,24 +128,32 @@ export class MembersController {
     if (admin) {
       if (admin.authority === 'admin') {
         const memberId = Number(req.params.memberId);
-        const update = req.body;
-        await this.membersService.updateMember({ id: memberId }, update);
+        const member = await this.membersService.readMember({ id: memberId });
+        if (teamId === member.teamId) {
+          const update = req.body;
+          await this.membersService.updateMember({ id: memberId }, update);
+        } else {
+          throw new HttpException(
+            '수정하려는 팀원이 팀에 소속돼 있지 않습니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
       } else {
         throw new HttpException(
-          '팀원 수정 권한이 없습니다.',
+          '사용자에게 팀원 수정 권한이 없습니다.',
           HttpStatus.FORBIDDEN,
         );
       }
     } else {
       throw new HttpException(
-        '수정하려는 팀의 팀원이 아닙니다.',
+        '사용자가 수정하려는 팀의 팀원이 아닙니다.',
         HttpStatus.BAD_REQUEST,
       );
     }
   }
 
   @ApiOperation({
-    summary: '팀원 삭제 API',
+    summary: '(팀 관리자)팀원 삭제 API',
     description: '사용자가 관리하는 팀의 팀원을 삭제한다.',
   })
   @ApiParam({ name: 'memberId' })
@@ -108,7 +161,7 @@ export class MembersController {
   @ApiResponse({ status: 200 })
   @Delete(':memberId')
   @UseGuards(JwtAuthGuard)
-  async deleteMember(@Req() req) {
+  async deleteMember(@Req() req): Promise<void> {
     const userId = req.user.id;
     const teamId = req.params.teamId;
     const admin = await this.membersService.readMember({
@@ -118,16 +171,24 @@ export class MembersController {
     if (admin) {
       if (admin.authority === 'admin') {
         const memberId = Number(req.params.memberId);
-        this.membersService.deleteMember({ id: memberId });
+        const member = await this.membersService.readMember({ id: memberId });
+        if (teamId === member.teamId) {
+          await this.membersService.deleteMember({ id: memberId });
+        } else {
+          throw new HttpException(
+            '삭제하려는 팀원이 팀에 소속돼 있지 않습니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
       } else {
         throw new HttpException(
-          '팀원 삭제 권한이 없습니다.',
+          '사용자에게 팀원 삭제 권한이 없습니다.',
           HttpStatus.FORBIDDEN,
         );
       }
     } else {
       throw new HttpException(
-        '삭제하려는 팀의 팀원이 아닙니다.',
+        '사용자가 삭제하려는 팀의 팀원이 아닙니다.',
         HttpStatus.BAD_REQUEST,
       );
     }

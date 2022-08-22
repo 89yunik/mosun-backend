@@ -36,10 +36,10 @@ export class TeamsController {
     description: '팀 정보와 로그인된 사용자 정보로 팀을 생성한다.',
   })
   @ApiBody({ type: CreateTeamDto })
-  @ApiResponse({ status: 200, type: Team })
+  @ApiResponse({ status: 200 })
   @Post()
   @UseGuards(JwtAuthGuard)
-  async createTeam(@Req() req: Request): Promise<Team> {
+  async createTeam(@Req() req: Request): Promise<void> {
     const teamInfo = req.body;
     const team = await this.teamsService.createTeam(teamInfo);
     this.membersService.createMember({
@@ -47,7 +47,20 @@ export class TeamsController {
       userId: req.user.id,
       authority: 'admin',
     });
-    return team;
+  }
+
+  @ApiOperation({
+    summary: '소속팀 조회 API',
+    description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
+  })
+  @ApiResponse({ status: 200, type: Member })
+  @Get('affiliatedTeam')
+  @UseGuards(JwtAuthGuard)
+  async readTeamsOfUser(@Req() req: Request): Promise<Member[]> {
+    const members = await this.membersService.readMembers({
+      userId: req.user.id,
+    });
+    return members;
   }
 
   @ApiOperation({
@@ -62,7 +75,7 @@ export class TeamsController {
   }
 
   @ApiOperation({
-    summary: '팀 수정 API',
+    summary: '(팀 관리자)팀 수정 API',
     description: '사용자가 관리하는 팀 정보를 수정한다.',
   })
   @ApiParam({ name: 'teamId' })
@@ -70,7 +83,7 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Put(':teamId')
   @UseGuards(JwtAuthGuard)
-  async updateTeam(@Req() req) {
+  async updateTeam(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
     const userId = req.user.id;
     const admin = await this.membersService.readMember({
@@ -80,7 +93,7 @@ export class TeamsController {
     if (admin) {
       if (admin.authority === 'admin') {
         const update = req.body;
-        this.teamsService.updateTeam({ id: teamId }, update);
+        await this.teamsService.updateTeam({ id: teamId }, update);
       } else {
         throw new HttpException(
           '팀 수정 권한이 없습니다.',
@@ -96,14 +109,14 @@ export class TeamsController {
   }
 
   @ApiOperation({
-    summary: '팀 삭제 API',
+    summary: '(팀 관리자)팀 삭제 API',
     description: '사용자가 관리하는 팀을 삭제한다.',
   })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200 })
   @Delete(':teamId')
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Req() req) {
+  async deleteTeam(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
     const userId = req.user.id;
     const admin = await this.membersService.readMember({
@@ -125,19 +138,5 @@ export class TeamsController {
         HttpStatus.BAD_REQUEST,
       );
     }
-  }
-
-  @ApiOperation({
-    summary: '소속팀 조회 API',
-    description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
-  })
-  @ApiResponse({ status: 200, type: Member })
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  async readMembersOfUser(@Req() req: Request): Promise<Member[]> {
-    const members = await this.membersService.readMembers({
-      userId: req.user.id,
-    });
-    return members;
   }
 }
