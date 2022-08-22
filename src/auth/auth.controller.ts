@@ -16,7 +16,7 @@ import {
 declare global {
   namespace Express {
     interface Request {
-      user: Partial<User>;
+      user: User;
     }
   }
 }
@@ -54,14 +54,24 @@ export class AuthController {
   googleCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
+    const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
+      sameSite: 'strict',
       httpOnly: true,
+      secure: true,
     });
-    res.json({ accessToken });
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: accessExp * 60 * 1000,
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: true,
+      })
+      .redirect(process.env.AUTH_REDIRECT);
     return res;
   }
 
@@ -86,14 +96,24 @@ export class AuthController {
   kakaoCallback(@Req() req: Request, @Res() res: Response): Response {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
+    const accessExp = Number(process.env.JWT_ACCESS_EXP);
     const accessToken = this.authService.setToken('access', user);
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
+      sameSite: 'strict',
       httpOnly: true,
+      secure: true,
     });
-    res.json({ accessToken });
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: accessExp * 60 * 1000,
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: true,
+      })
+      .redirect(process.env.AUTH_REDIRECT);
     return res;
   }
 
@@ -103,13 +123,34 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('accessToken')
-  @UseGuards(JwtAuthGuard)
-  async getAccessToken(@Req() req) {
+  // @UseGuards(JwtAuthGuard)
+  async getAccessToken(@Req() req, @Res() res) {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
+      const accessExp = Number(process.env.JWT_ACCESS_EXP);
       const user = await this.usersService.readUser({ refreshToken });
       const accessToken = this.authService.setToken('access', user);
-      return { accessToken };
+      res
+        .cookie('accessToken', accessToken, {
+          maxAge: accessExp * 60 * 1000,
+          sameSite: 'strict',
+          httpOnly: true,
+          secure: true,
+        })
+        .redirect(process.env.AUTH_REDIRECT);
     }
+  }
+
+  @ApiOperation({
+    summary: '로그아웃 API',
+    description: '사용자를 로그아웃한다.',
+  })
+  @ApiResponse({ status: 200 })
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Res() res: Response): Response {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken').redirect(process.env.AUTH_REDIRECT);
+    return res;
   }
 }

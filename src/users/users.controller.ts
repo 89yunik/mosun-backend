@@ -15,9 +15,9 @@ export class UsersController {
   })
   @ApiParam({ name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: User, isArray: true })
-  @Get('search')
+  @Get()
   @UseGuards(JwtAuthGuard)
-  searchUser(@Param() param) {
+  searchUsers(@Param() param) {
     return this.usersService.readUsers(param.keyword);
   }
 
@@ -29,22 +29,7 @@ export class UsersController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req) {
-    const refreshToken = req.cookies.refreshToken;
-    if (refreshToken) {
-      const user = await this.usersService.readUser({ refreshToken });
-      return user;
-    }
-  }
-
-  @ApiOperation({
-    summary: '로그아웃 API',
-    description: '사용자를 로그아웃한다.',
-  })
-  @ApiResponse({ status: 200 })
-  @Get('logout')
-  @UseGuards(JwtAuthGuard)
-  logout(@Res() res: Response): Response {
-    res.clearCookie('refreshToken').redirect(process.env.AUTH_REDIRECT);
-    return res;
+    const { email, name } = req.user;
+    return { email, name };
   }
 }
