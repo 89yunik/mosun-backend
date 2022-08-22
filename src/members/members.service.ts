@@ -10,10 +10,9 @@ export class MembersService {
     @InjectRepository(Member)
     private membersRepository: Repository<Member>,
   ) {}
-  async createMember(memberInfo: CreateMemberDto): Promise<Member> {
+  async createMember(memberInfo: CreateMemberDto): Promise<void> {
     const member = this.membersRepository.create(memberInfo);
     await this.membersRepository.save(member);
-    return member;
   }
 
   readMembers(options: Partial<Member>): Promise<Member[]> {
