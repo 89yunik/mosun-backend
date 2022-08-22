@@ -16,14 +16,12 @@ export class UsersService {
     return user;
   }
   async readUsers(options?: Partial<User>): Promise<User[]> {
-    return this.usersRepository.find();
+    return this.usersRepository.findBy(options);
   }
 
-  async readUser(options: Partial<User>): Promise<User | undefined> {
+  async readUser(options: Partial<User>): Promise<User> {
     const user = await this.usersRepository.findOneBy(options);
-    if (user) {
-      return user;
-    }
+    return user;
   }
 
   async readOrCreateUser(target: CreateUserDto): Promise<User> {

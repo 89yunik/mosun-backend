@@ -18,7 +18,7 @@ export class TeamsService {
   }
 
   async readTeams(options?: Partial<Team>): Promise<Team[]> {
-    return this.teamsRepository.find();
+    return this.teamsRepository.findBy(options);
   }
   async updateTeam(
     target: Partial<Team>,
