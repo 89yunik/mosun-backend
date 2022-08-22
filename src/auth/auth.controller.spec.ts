@@ -4,9 +4,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { createRequest, createResponse } from 'node-mocks-http';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { mockRepository } from 'src/users/users.service.spec';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { mockRepository } from './auth.service.spec';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -34,6 +34,7 @@ describe('AuthController', () => {
     expect(controller.googleCallback).toBeDefined();
     expect(controller.kakaoLogin).toBeDefined();
     expect(controller.kakaoCallback).toBeDefined();
+    expect(controller.logout).toBeDefined();
   });
 
   it('should create jwt tokens', () => {
@@ -50,9 +51,19 @@ describe('AuthController', () => {
         },
       },
     };
-    req.user = { email: 'test@google.com', name: 'test' };
+    req.user = {
+      id: 1,
+      email: 'test@google.com',
+      name: 'test',
+      refreshToken: '',
+    };
     expect(controller.googleCallback(req, res)).toMatchObject(expectedResult);
-    req.user = { email: 'test@kakao.com', name: 'test' };
+    req.user = {
+      id: 1,
+      email: 'test@kakao.com',
+      name: 'test',
+      refreshToken: '',
+    };
     expect(controller.kakaoCallback(req, res)).toMatchObject(expectedResult);
   });
 });
