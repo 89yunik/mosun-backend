@@ -5,11 +5,13 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { Team } from 'src/teams/team.entity';
 
 @Entity()
+@Unique(['teamId', 'userId'])
 export class Member {
   @PrimaryGeneratedColumn()
   id: number;
