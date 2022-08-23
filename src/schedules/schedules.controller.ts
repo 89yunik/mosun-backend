@@ -1,4 +1,12 @@
-import { Controller, Delete, Post, Put, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -36,7 +44,7 @@ export class SchedulesController {
   })
   //   @ApiBody({ type: Schedule })
   @ApiResponse({ status: 200 })
-  @Post()
+  @Get()
   @UseGuards(JwtAuthGuard)
   async readSchedules(@Req() req: Request): Promise<void> {
     // const options = req.body;
