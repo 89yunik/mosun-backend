@@ -18,6 +18,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateScheduleDto } from './dtos/create-schedule.dto';
 import { UpdateScheduleDto } from './dtos/update-schedule.dto';
+import { Schedule } from './schedule.entity';
 import { SchedulesService } from './schedules.service';
 
 @ApiTags('Schedules')
@@ -34,7 +35,9 @@ export class SchedulesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async createSchedule(@Req() req: Request): Promise<void> {
+    //member인지 확인하는 로직 추가 필요
     const scheduleInfo = req.body;
+    scheduleInfo.date = new Date(scheduleInfo.date);
     await this.schedulesService.createSchedule(scheduleInfo);
   }
 
@@ -46,9 +49,10 @@ export class SchedulesController {
   @ApiResponse({ status: 200 })
   @Get()
   @UseGuards(JwtAuthGuard)
-  async readSchedules(@Req() req: Request): Promise<void> {
+  async readSchedules(@Req() req: Request): Promise<Schedule[]> {
     // const options = req.body;
-    await this.schedulesService.readSchedules();
+    const result = await this.schedulesService.readSchedules();
+    return result;
   }
 
   @ApiOperation({
@@ -62,8 +66,12 @@ export class SchedulesController {
   @UseGuards(JwtAuthGuard)
   async updateSchedule(@Req() req): Promise<void> {
     const scheduleId = Number(req.params.scheduleId);
-    const update = req.body;
-    await this.schedulesService.updateSchedule({ id: scheduleId }, update);
+    const scheduleInfo = req.body;
+    scheduleInfo.date = new Date(scheduleInfo.date);
+    await this.schedulesService.updateSchedule(
+      { id: scheduleId },
+      scheduleInfo,
+    );
   }
 
   @ApiOperation({
