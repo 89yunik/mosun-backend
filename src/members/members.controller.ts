@@ -34,7 +34,7 @@ export class MembersController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async createUserMember(@Req() req): Promise<void> {
-    const teamId = req.params.teamId;
+    const teamId = Number(req.params.teamId);
     const userId = req.user.id;
     await this.membersService.createMember({
       teamId,
