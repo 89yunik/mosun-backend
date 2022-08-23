@@ -7,7 +7,7 @@ export class User {
   id: number;
 
   @ApiProperty()
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ type: 'varchar', length: 50, unique: true, update: false })
   email: string;
 
   @ApiProperty()
