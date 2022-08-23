@@ -19,6 +19,7 @@ import {
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMemberDto } from './dtos/create-member.dto';
+import { UpdateMemberDto } from './dtos/update-member.dto';
 import { Member } from './member.entity';
 import { MembersService } from './members.service';
 
@@ -114,7 +115,7 @@ export class MembersController {
   })
   @ApiParam({ name: 'memberId' })
   @ApiParam({ name: 'teamId' })
-  @ApiBody({ type: CreateMemberDto })
+  @ApiBody({ type: UpdateMemberDto })
   @ApiResponse({ status: 200 })
   @Put(':memberId')
   @UseGuards(JwtAuthGuard)
