@@ -21,6 +21,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Member } from 'src/members/member.entity';
 import { MembersService } from 'src/members/members.service';
 import { CreateTeamDto } from './dtos/create-team.dto';
+import { UpdateTeamDto } from './dtos/update-team.dto';
 import { Team } from './team.entity';
 import { TeamsService } from './teams.service';
 @ApiTags('Teams')
@@ -40,7 +41,7 @@ export class TeamsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async createTeam(@Req() req: Request): Promise<void> {
-    const teamInfo = req.body;
+    const teamInfo: CreateTeamDto = req.body;
     const team = await this.teamsService.createTeam(teamInfo);
     this.membersService.createMember({
       teamId: team.id,
@@ -79,7 +80,7 @@ export class TeamsController {
     description: '사용자가 관리하는 팀 정보를 수정한다.',
   })
   @ApiParam({ name: 'teamId' })
-  @ApiBody({ type: Team })
+  @ApiBody({ type: UpdateTeamDto })
   @ApiResponse({ status: 200 })
   @Put(':teamId')
   @UseGuards(JwtAuthGuard)
