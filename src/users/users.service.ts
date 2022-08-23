@@ -19,9 +19,9 @@ export class UsersService {
     return this.usersRepository.findBy(options);
   }
 
-  async readUser(options: Partial<User>): Promise<User> {
-    const user = await this.usersRepository.findOneBy(options);
-    return user;
+  async readUser(options: Partial<User>): Promise<Partial<User>> {
+    const { id, email, name } = await this.usersRepository.findOneBy(options);
+    return { id, email, name };
   }
 
   async readOrCreateUser(target: CreateUserDto): Promise<Partial<User>> {
