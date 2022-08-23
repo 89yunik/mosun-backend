@@ -17,7 +17,7 @@ export class Member {
   id: number;
 
   @ApiProperty()
-  @Column({ name: 'teamId' })
+  @Column({ name: 'teamId', update: false })
   teamId: number;
   @ManyToOne(() => Team, (team) => team.id, {
     cascade: true,
@@ -28,7 +28,7 @@ export class Member {
   team: Team;
 
   @ApiProperty()
-  @Column({ name: 'userId' })
+  @Column({ name: 'userId', update: false })
   userId: number;
   @ManyToOne(() => User, (user) => user.id, {
     cascade: true,
