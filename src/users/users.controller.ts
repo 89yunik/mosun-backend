@@ -43,8 +43,8 @@ export class UsersController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async readLoginedUser(@Req() req) {
-    const { email, name } = req.user;
-    return { email, name };
+    const { email, name, members, admins } = req.user;
+    return { email, name, members, admins };
   }
 
   @ApiOperation({
