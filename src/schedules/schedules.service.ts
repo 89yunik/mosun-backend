@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateScheduleDto } from './dtos/create-schedule.dto';
 import { UpdateScheduleDto } from './dtos/update-schedule.dto';
 import { Schedule } from './schedule.entity';
@@ -24,11 +24,13 @@ export class SchedulesService {
   async updateSchedule(
     target: Partial<Schedule>,
     update: UpdateScheduleDto,
-  ): Promise<void> {
-    await this.schedulesRepository.update(target, update);
+  ): Promise<UpdateResult> {
+    const updateResult = await this.schedulesRepository.update(target, update);
+    return updateResult;
   }
 
-  async deleteSchedule(target: Partial<Schedule>): Promise<void> {
-    await this.schedulesRepository.delete(target);
+  async deleteSchedule(target: Partial<Schedule>): Promise<DeleteResult> {
+    const deleteResult = await this.schedulesRepository.delete(target);
+    return deleteResult;
   }
 }
