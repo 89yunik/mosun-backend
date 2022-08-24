@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateMemberDto } from './dtos/create-member.dto';
 import { Member } from './member.entity';
 
@@ -25,11 +25,13 @@ export class MembersService {
   async updateMember(
     target: Partial<Member>,
     update: Partial<Member>,
-  ): Promise<void> {
-    await this.membersRepository.update(target, update);
+  ): Promise<UpdateResult> {
+    const updateResult = await this.membersRepository.update(target, update);
+    return updateResult;
   }
 
-  async deleteMember(target: Partial<Member>): Promise<void> {
-    await this.membersRepository.delete(target);
+  async deleteMember(target: Partial<Member>): Promise<DeleteResult> {
+    const deleteResult = await this.membersRepository.delete(target);
+    return deleteResult;
   }
 }

@@ -18,8 +18,7 @@ export interface LoginedUser {
   id: number;
   email: string;
   name: string;
-  members: number[];
-  admins: Member[];
+  members: Member[];
 }
 declare global {
   namespace Express {
@@ -70,12 +69,7 @@ export class AuthController {
     const members = await this.membersService.readMembers({ userId: user.id });
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
-    user.members = members.map((member) => member.id);
-    user.admins = members.filter((member) => {
-      if (member.authority === 'admin') {
-        return member.id;
-      }
-    });
+    user.members = members;
     const accessToken = this.authService.setToken('access', user);
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
@@ -153,12 +147,7 @@ export class AuthController {
       const members = await this.membersService.readMembers({
         userId: user.id,
       });
-      user.members = members.map((member) => member.id);
-      user.admins = members.filter((member) => {
-        if (member.authority === 'admin') {
-          return member.id;
-        }
-      });
+      user.members = members;
       const accessToken = this.authService.setToken('access', user);
       res
         .cookie('accessToken', accessToken, {

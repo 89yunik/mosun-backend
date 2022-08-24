@@ -81,30 +81,23 @@ export class MembersController {
   @UseGuards(JwtAuthGuard)
   async createMember(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
-    const adminId = req.user.id;
-    const admin = await this.membersService.readMember({
-      userId: adminId,
-      teamId,
-    });
+    const members = req.user.members;
+    const admin = members.find(
+      (member: Member) =>
+        member.teamId === teamId && member.authority === 'admin',
+    );
     if (admin) {
-      if (admin.authority === 'admin') {
-        const memberInfo = req.body;
-        const userId = Number(req.params.userId);
-        await this.membersService.createMember({
-          teamId,
-          userId,
-          ...memberInfo,
-        });
-      } else {
-        throw new HttpException(
-          '사용자에게 팀원 추가 권한이 없습니다.',
-          HttpStatus.FORBIDDEN,
-        );
-      }
+      const memberInfo = req.body;
+      const userId = Number(req.params.userId);
+      await this.membersService.createMember({
+        teamId,
+        userId,
+        ...memberInfo,
+      });
     } else {
       throw new HttpException(
-        '사용자가 추가하려는 팀의 팀원이 아닙니다.',
-        HttpStatus.BAD_REQUEST,
+        '팀원을 추가하려는 팀의 팀원이 아니거나, 팀원 추가 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
       );
     }
   }
@@ -121,34 +114,28 @@ export class MembersController {
   @UseGuards(JwtAuthGuard)
   async updateMember(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
-    const userId = req.user.id;
-    const admin = await this.membersService.readMember({
-      userId,
-      teamId,
-    });
+    const members = req.user.members;
+    const admin = members.find(
+      (member: Member) =>
+        member.teamId === teamId && member.authority === 'admin',
+    );
     if (admin) {
-      if (admin.authority === 'admin') {
-        const memberId = Number(req.params.memberId);
-        const member = await this.membersService.readMember({ id: memberId });
-        if (teamId === member.teamId) {
-          const update = req.body;
-          await this.membersService.updateMember({ id: memberId }, update);
-        } else {
-          throw new HttpException(
-            '수정하려는 팀원이 팀에 소속돼 있지 않습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-      } else {
+      const memberId = Number(req.params.memberId);
+      const update = req.body;
+      const updateResult = await this.membersService.updateMember(
+        { id: memberId, teamId },
+        update,
+      );
+      if (!updateResult.affected) {
         throw new HttpException(
-          '사용자에게 팀원 수정 권한이 없습니다.',
-          HttpStatus.FORBIDDEN,
+          'teamId와 수정하려는 팀원의 memberId를 확인하십시오.',
+          HttpStatus.BAD_REQUEST,
         );
       }
     } else {
       throw new HttpException(
-        '사용자가 수정하려는 팀의 팀원이 아닙니다.',
-        HttpStatus.BAD_REQUEST,
+        '팀원을 수정하려는 팀의 팀원이 아니거나, 팀원 수정 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
       );
     }
   }
@@ -163,34 +150,28 @@ export class MembersController {
   @Delete(':memberId')
   @UseGuards(JwtAuthGuard)
   async deleteMember(@Req() req): Promise<void> {
-    const userId = req.user.id;
-    const teamId = req.params.teamId;
-    const admin = await this.membersService.readMember({
-      userId,
-      teamId,
-    });
+    const teamId = Number(req.params.teamId);
+    const members = req.user.members;
+    const admin = members.find(
+      (member: Member) =>
+        member.teamId === teamId && member.authority === 'admin',
+    );
     if (admin) {
-      if (admin.authority === 'admin') {
-        const memberId = Number(req.params.memberId);
-        const member = await this.membersService.readMember({ id: memberId });
-        if (teamId === member.teamId) {
-          await this.membersService.deleteMember({ id: memberId });
-        } else {
-          throw new HttpException(
-            '삭제하려는 팀원이 팀에 소속돼 있지 않습니다.',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-      } else {
+      const memberId = Number(req.params.memberId);
+      const deleteResult = await this.membersService.deleteMember({
+        id: memberId,
+        teamId,
+      });
+      if (!deleteResult.affected) {
         throw new HttpException(
-          '사용자에게 팀원 삭제 권한이 없습니다.',
-          HttpStatus.FORBIDDEN,
+          'teamId와 삭제하려는 팀원의 memberId를 확인하십시오.',
+          HttpStatus.BAD_REQUEST,
         );
       }
     } else {
       throw new HttpException(
-        '사용자가 삭제하려는 팀의 팀원이 아닙니다.',
-        HttpStatus.BAD_REQUEST,
+        '팀원을 삭제하려는 팀의 팀원이 아니거나, 팀원 삭제 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
       );
     }
   }

@@ -40,7 +40,7 @@ export class SchedulesController {
   async createSchedule(@Req() req: Request): Promise<void> {
     const memberId = Number(req.params.memberId);
     const members = req.user.members;
-    if (members.includes(memberId)) {
+    if (members.find((member) => member.id === memberId)) {
       const scheduleInfo = req.body;
       scheduleInfo.date = new Date(scheduleInfo.date);
       await this.schedulesService.createSchedule({ memberId, ...scheduleInfo });
@@ -64,7 +64,7 @@ export class SchedulesController {
   async readSchedules(@Req() req: Request): Promise<Schedule[]> {
     const memberId = Number(req.params.memberId);
     const members = req.user.members;
-    if (members.includes(memberId)) {
+    if (members.find((member) => member.id === memberId)) {
       // const options = req.body;
       const result = await this.schedulesService.readSchedules();
       return result;
