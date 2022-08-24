@@ -19,18 +19,18 @@ export class UsersService {
     return this.usersRepository.findBy(options);
   }
 
-  async readUser(options: Partial<User>): Promise<User> {
-    const user = await this.usersRepository.findOneBy(options);
-    return user;
+  async readUser(options: Partial<User>): Promise<Partial<User>> {
+    const { id, email, name } = await this.usersRepository.findOneBy(options);
+    return { id, email, name };
   }
 
-  async readOrCreateUser(target: CreateUserDto): Promise<User> {
+  async readOrCreateUser(target: CreateUserDto): Promise<Partial<User>> {
     let user = await this.readUser(target);
     if (!user) {
       console.log('회원가입');
       user = await this.createUser(target);
     }
-    return user;
+    return { id: user.id, email: user.email, name: user.name };
   }
   async updateUser(
     target: Partial<User>,

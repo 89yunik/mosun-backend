@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Request, Response } from 'express';
-import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
@@ -12,11 +11,20 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { MembersService } from 'src/members/members.service';
+import { Member } from 'src/members/member.entity';
 
+export interface LoginedUser {
+  id: number;
+  email: string;
+  name: string;
+  members: number[];
+  admins: Member[];
+}
 declare global {
   namespace Express {
     interface Request {
-      user: User;
+      user: LoginedUser;
     }
   }
 }
@@ -31,6 +39,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private membersService: MembersService,
   ) {}
 
   @ApiOperation({
@@ -51,13 +60,23 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
-  googleCallback(@Req() req: Request, @Res() res: Response): Response {
+  async googleCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
-    const accessToken = this.authService.setToken('access', user);
+    const members = await this.membersService.readMembers({ userId: user.id });
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
+    user.members = members.map((member) => member.id);
+    user.admins = members.filter((member) => {
+      if (member.authority === 'admin') {
+        return member.id;
+      }
+    });
+    const accessToken = this.authService.setToken('access', user);
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
       sameSite: 'strict',
@@ -128,7 +147,18 @@ export class AuthController {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
       const accessExp = Number(process.env.JWT_ACCESS_EXP);
-      const user = await this.usersService.readUser({ refreshToken });
+      const user: Partial<LoginedUser> = await this.usersService.readUser({
+        refreshToken,
+      });
+      const members = await this.membersService.readMembers({
+        userId: user.id,
+      });
+      user.members = members.map((member) => member.id);
+      user.admins = members.filter((member) => {
+        if (member.authority === 'admin') {
+          return member.id;
+        }
+      });
       const accessToken = this.authService.setToken('access', user);
       res
         .cookie('accessToken', accessToken, {
