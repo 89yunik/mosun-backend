@@ -54,7 +54,7 @@ export class SchedulesController {
 
   @ApiOperation({
     summary: '일정 검색 API',
-    description: '검색어와 일치하는 일정들을 조회한다.',
+    description: '검색 조건과 일치하는 일정들을 조회한다.',
   })
   @ApiParam({ name: 'memberId' })
   //   @ApiBody({ type: Schedule })
