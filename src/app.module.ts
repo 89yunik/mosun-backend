@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { TeamsModule } from './teams/teams.module';
 import { MembersModule } from './members/members.module';
 import { SchedulesModule } from './schedules/schedules.module';
+import { RecordsModule } from './records/records.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SchedulesModule } from './schedules/schedules.module';
     TeamsModule,
     MembersModule,
     SchedulesModule,
+    RecordsModule,
   ],
   controllers: [],
   providers: [],
