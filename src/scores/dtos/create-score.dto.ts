@@ -15,5 +15,5 @@ export class CreateScoreDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  score: number;
+  point: number;
 }
