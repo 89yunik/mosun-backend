@@ -9,7 +9,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateScoreDto } from './dtos/create-score.dto';
@@ -17,6 +23,7 @@ import { UpdateScoreDto } from './dtos/update-score.dto';
 import { Score } from './score.entity';
 import { ScoresService } from './scores.service';
 
+@ApiTags('Scores')
 @Controller('scores')
 export class ScoresController {
   constructor(private scoresService: ScoresService) {}
