@@ -1,14 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class CreateRecordDto {
+export class CreateScoreDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  scheduleId: number;
+  memberId: number;
 
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  type: string;
+  recordId: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  point: number;
 }

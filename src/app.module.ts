@@ -7,6 +7,7 @@ import { TeamsModule } from './teams/teams.module';
 import { MembersModule } from './members/members.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { RecordsModule } from './records/records.module';
+import { ScoresModule } from './scores/scores.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RecordsModule } from './records/records.module';
     MembersModule,
     SchedulesModule,
     RecordsModule,
+    ScoresModule,
   ],
   controllers: [],
   providers: [],
