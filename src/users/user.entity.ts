@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,6 +11,7 @@ export class User {
   email: string;
 
   @ApiProperty()
+  @Index({ fulltext: true })
   @Column({ type: 'varchar', length: 20 })
   name: string;
 

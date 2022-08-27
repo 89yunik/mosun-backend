@@ -14,6 +14,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Request } from 'express';
+import { LoginedUser } from 'src/auth/auth.controller';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';
@@ -23,28 +25,32 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
-  @ApiOperation({
-    summary: '사용자 검색 API',
-    description: '검색어와 일치하는 사용자들을 조회한다.',
-  })
-  @ApiParam({ name: 'keyword', required: false })
-  @ApiResponse({ status: 200, type: User, isArray: true })
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  readUsers(@Param() param) {
-    return this.usersService.readUsers(param.keyword);
-  }
 
   @ApiOperation({
     summary: '사용자 프로필 API',
     description: '로그인된 사용자 프로필을 가져온다.',
   })
   @ApiResponse({ status: 200, type: User })
-  @Get('profile')
   @UseGuards(JwtAuthGuard)
-  async readLoginedUser(@Req() req) {
-    const { email, name, members, admins } = req.user;
-    return { email, name, members, admins };
+  @Get('profile')
+  readLoginedUser(@Req() req: Request): Partial<LoginedUser> {
+    if (req.user) {
+      const { email, name, members } = req.user;
+      return { email, name, members };
+    }
+  }
+
+  @ApiOperation({
+    summary: '사용자 검색 API',
+    description: '검색어와 일치하는 사용자들을 조회한다.',
+  })
+  @ApiParam({ name: 'keyword' })
+  @ApiResponse({ status: 200, type: User, isArray: true })
+  @Get(':keyword')
+  @UseGuards(JwtAuthGuard)
+  readUsers(@Req() req: Request): Promise<User[]> {
+    const keyword = req.params.keyword;
+    return this.usersService.readUsers(keyword);
   }
 
   @ApiOperation({
