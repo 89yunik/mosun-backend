@@ -42,13 +42,13 @@ export class ScoresController {
   }
 
   @ApiOperation({
-    summary: '점수 검색 API',
-    description: '검색 조건과 일치하는 점수들을 조회한다.',
+    summary: '점수 조회 API',
+    description: '조건(멤버 id, 기간, 종류)을 입력 받아 점수들을 조회한다.',
   })
   @ApiResponse({ status: 200 })
   @Get()
   @UseGuards(JwtAuthGuard)
-  async readScore(@Req() req: Request): Promise<Score[]> {
+  async readScores(@Req() req: Request): Promise<Score[]> {
     const result = await this.scoresService.readScores();
     return result;
   }
