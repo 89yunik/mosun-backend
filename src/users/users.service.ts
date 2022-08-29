@@ -33,7 +33,7 @@ export class UsersService {
   }
 
   async readOrCreateUser(target: CreateUserDto): Promise<Partial<User>> {
-    let user = await this.readUser(target);
+    let user = await this.readUser({ email: target.email });
     if (!user) {
       console.log('회원가입');
       user = await this.createUser(target);
