@@ -24,7 +24,7 @@ import { Record } from './record.entity';
 import { RecordsService } from './records.service';
 
 @ApiTags('Records')
-@Controller('records')
+@Controller()
 export class RecordsController {
   constructor(private recordsService: RecordsService) {}
 
@@ -34,7 +34,7 @@ export class RecordsController {
   })
   @ApiBody({ type: CreateRecordDto })
   @ApiResponse({ status: 200 })
-  @Post()
+  @Post('records')
   @UseGuards(JwtAuthGuard)
   async createRecord(@Req() req: Request): Promise<void> {
     const recordInfo = req.body;
@@ -42,15 +42,18 @@ export class RecordsController {
   }
 
   @ApiOperation({
-    summary: '전적 검색 API',
+    summary: '전적 조회 API',
     description: '검색 조건과 일치하는 전적들을 조회한다.',
   })
-  // @ApiBody({ type: CreateRecordDto })
+  @ApiParam({ name: 'type' })
+  @ApiParam({ name: 'scheduleId' })
   @ApiResponse({ status: 200 })
-  @Get()
+  @Get('schedules/:scheduleId/records/:type')
   @UseGuards(JwtAuthGuard)
-  async readRecord(@Req() req: Request): Promise<Record[]> {
-    const result = await this.recordsService.readRecords();
+  async readRecords(@Req() req: Request): Promise<Record[]> {
+    const scheduleId = Number(req.params.scheduleId);
+    const type = req.params.type === 'all' ? undefined : req.params.type;
+    const result = await this.recordsService.readRecords({ scheduleId, type });
     return result;
   }
 
@@ -61,7 +64,7 @@ export class RecordsController {
   @ApiParam({ name: 'recordId' })
   @ApiBody({ type: UpdateRecordDto })
   @ApiResponse({ status: 200 })
-  @Put(':recordId')
+  @Put('records/:recordId')
   @UseGuards(JwtAuthGuard)
   async updateRecord(@Req() req: Request): Promise<void> {
     const recordId = Number(req.params.recordId);
@@ -84,7 +87,7 @@ export class RecordsController {
   })
   @ApiParam({ name: 'recordId' })
   @ApiResponse({ status: 200 })
-  @Delete(':recordId')
+  @Delete('records/:recordId')
   @UseGuards(JwtAuthGuard)
   async deleteRecord(@Req() req: Request): Promise<void> {
     const recordId = Number(req.params.recordId);
