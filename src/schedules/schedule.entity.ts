@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 
 @Entity()
@@ -29,6 +30,7 @@ export class Schedule {
   date: Date;
 
   @ApiProperty()
+  @Index({ fulltext: true })
   @Column({ type: 'varchar', length: 20 })
   name: string;
 

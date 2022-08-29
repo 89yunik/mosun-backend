@@ -56,17 +56,17 @@ export class SchedulesController {
     summary: '일정 검색 API',
     description: '검색 조건과 일치하는 일정들을 조회한다.',
   })
+  @ApiParam({ name: 'keyword' })
   @ApiParam({ name: 'memberId' })
-  //   @ApiBody({ type: Schedule })
   @ApiResponse({ status: 200 })
-  @Get()
+  @Get(':keyword')
   @UseGuards(JwtAuthGuard)
   async readSchedules(@Req() req: Request): Promise<Schedule[]> {
     const memberId = Number(req.params.memberId);
     const members = req.user.members;
     if (members.find((member) => member.id === memberId)) {
-      // const options = req.body;
-      const result = await this.schedulesService.readSchedules();
+      const keyword = req.params.keyword;
+      const result = await this.schedulesService.readSchedules(keyword);
       return result;
     } else {
       throw new HttpException(
