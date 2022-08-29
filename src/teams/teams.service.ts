@@ -17,8 +17,13 @@ export class TeamsService {
     return team;
   }
 
-  async readTeams(options?: Partial<Team>): Promise<Team[]> {
-    return this.teamsRepository.findBy(options);
+  async readTeams(keyword: string): Promise<Team[]> {
+    const readResult = await this.teamsRepository
+      .createQueryBuilder()
+      .select()
+      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
+      .getMany();
+    return readResult;
   }
   async updateTeam(
     target: Partial<Team>,
