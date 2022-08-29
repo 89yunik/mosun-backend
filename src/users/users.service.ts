@@ -19,7 +19,7 @@ export class UsersService {
     const readResult = await this.usersRepository
       .createQueryBuilder()
       .select()
-      .where(`MATCH(name) AGAINST ('${keyword}' IN BOOLEAN MODE)`)
+      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
       .getMany();
     return readResult;
   }
