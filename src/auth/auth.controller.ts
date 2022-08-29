@@ -1,4 +1,13 @@
-import { Controller, Get, UseGuards, HttpCode, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  HttpCode,
+  Res,
+  Req,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guards/kakao-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -106,13 +115,18 @@ export class AuthController {
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
-  kakaoCallback(@Req() req: Request, @Res() res: Response): Response {
+  async kakaoCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
-    const accessToken = this.authService.setToken('access', user);
+    const members = await this.membersService.readMembers({ userId: user.id });
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
+    user.members = members;
+    const accessToken = this.authService.setToken('access', user);
     res.cookie('refreshToken', refreshToken, {
       maxAge: refreshExp * 60 * 60 * 1000,
       sameSite: 'strict',
@@ -136,8 +150,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
   @Get('accessToken')
-  // @UseGuards(JwtAuthGuard)
-  async getAccessToken(@Req() req, @Res() res) {
+  async getAccessToken(@Req() req, @Res() res): Promise<void> {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
       const accessExp = Number(process.env.JWT_ACCESS_EXP);
@@ -157,6 +170,11 @@ export class AuthController {
           secure: true,
         })
         .redirect(process.env.AUTH_REDIRECT);
+    } else {
+      throw new HttpException(
+        'refreshToken이 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
