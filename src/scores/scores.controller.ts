@@ -15,10 +15,12 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateScoreDto } from './dtos/create-score.dto';
+import { ReadScoreDto } from './dtos/read-score.dto';
 import { UpdateScoreDto } from './dtos/update-score.dto';
 import { Score } from './score.entity';
 import { ScoresService } from './scores.service';
@@ -43,13 +45,24 @@ export class ScoresController {
 
   @ApiOperation({
     summary: '점수 조회 API',
-    description: '조건(멤버 id, 기간, 종류)을 입력 받아 점수들을 조회한다.',
+    description: '조건(기간, 종류, 멤버 id)을 입력 받아 점수들을 조회한다.',
   })
+  @ApiQuery({ type: ReadScoreDto })
   @ApiResponse({ status: 200 })
   @Get()
   @UseGuards(JwtAuthGuard)
   async readScores(@Req() req: Request): Promise<Score[]> {
-    const result = await this.scoresService.readScores();
+    const start = typeof req.query.start === 'string' && req.query.start;
+    const end = typeof req.query.end === 'string' && req.query.end;
+    const period = req.query.start && req.query.end && { start, end };
+    const type = typeof req.query.type === 'string' && req.query.type;
+    const memberId =
+      typeof req.query.memberId === 'string' && Number(req.query.memberId);
+    const result = await this.scoresService.readScores({
+      period,
+      type,
+      memberId,
+    });
     return result;
   }
 
