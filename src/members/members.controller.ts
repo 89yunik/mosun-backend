@@ -47,14 +47,15 @@ export class MembersController {
     summary: '팀원 검색 API',
     description: '검색어와 일치하는 팀원들을 조회한다.',
   })
+  @ApiParam({ name: 'keyword' })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200, type: Member, isArray: true })
-  @Get('members')
+  @Get('members/:keyword')
   @UseGuards(JwtAuthGuard)
   readMembers(@Req() req: Request): Promise<Member[]> {
     const teamId = Number(req.params.teamId);
-    const memberInfo = req.body;
-    return this.membersService.readMembers({ teamId, ...memberInfo });
+    const keyword = req.params.keyword;
+    return this.membersService.readMembers({ teamId }, keyword);
   }
 
   @ApiOperation({ summary: '팀원 탈퇴 API', description: '팀에서 탈퇴한다.' })
