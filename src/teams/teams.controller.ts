@@ -13,6 +13,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -55,7 +56,7 @@ export class TeamsController {
     description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
   })
   @ApiResponse({ status: 200, type: Member })
-  @Get('affiliatedTeam')
+  @Get('joined')
   @UseGuards(JwtAuthGuard)
   async readTeamsOfUser(@Req() req: Request): Promise<Member[]> {
     const members = req.user.members;
@@ -66,12 +67,12 @@ export class TeamsController {
     summary: '팀 검색 API',
     description: '검색어와 일치하는 팀들을 조회한다.',
   })
-  @ApiParam({ name: 'keyword' })
+  @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: Team, isArray: true })
-  @Get(':keyword')
+  @Get()
   @UseGuards(JwtAuthGuard)
   readTeams(@Req() req: Request): Promise<Team[]> {
-    const keyword = req.params.keyword;
+    const keyword = typeof req.query.keyword === 'string' && req.query.keyword;
     return this.teamsService.readTeams(keyword);
   }
 

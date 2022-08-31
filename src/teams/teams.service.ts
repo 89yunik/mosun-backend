@@ -17,11 +17,17 @@ export class TeamsService {
     return team;
   }
 
-  async readTeams(keyword: string): Promise<Team[]> {
+  async readTeams(keyword?: string): Promise<Team[]> {
     const readResult = await this.teamsRepository
       .createQueryBuilder()
       .select()
-      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
+      .where(
+        `${
+          keyword
+            ? `MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
       .getMany();
     return readResult;
   }
