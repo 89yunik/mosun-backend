@@ -42,7 +42,7 @@ export class UsersController {
 
   @ApiOperation({
     summary: '사용자 검색 API',
-    description: '검색어와 일치하는 사용자들을 조회한다.',
+    description: 'keyword와 일치하는 사용자들을 조회한다.',
   })
   @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: User, isArray: true })

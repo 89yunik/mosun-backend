@@ -62,9 +62,9 @@ export class AuthController {
 
   @ApiOperation({
     summary: '구글 로그인 콜백 API',
-    description: '로그인된 사용자 정보로 쿠키를 생성한다.',
+    description: '로그인된 사용자의 jwt token으로 쿠키를 생성한다.',
   })
-  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
+  @ApiResponse({ status: 200 })
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @HttpCode(200)
@@ -111,9 +111,9 @@ export class AuthController {
 
   @ApiOperation({
     summary: '카카오 로그인 콜백 API',
-    description: '로그인된 사용자 정보로 쿠키를 생성한다.',
+    description: '로그인된 사용자의 jwt token으로 쿠키를 생성한다.',
   })
-  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
+  @ApiResponse({ status: 200 })
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
   @HttpCode(200)
@@ -150,7 +150,7 @@ export class AuthController {
 
   @ApiOperation({
     summary: 'accessToken 재발급 API',
-    description: '토큰을 재발급한다.',
+    description: 'jwt accessToken을 재발급한다.',
   })
   @ApiResponse({ status: 200 })
   @Get('access-token')

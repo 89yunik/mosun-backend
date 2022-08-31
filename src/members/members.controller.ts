@@ -46,7 +46,7 @@ export class MembersController {
 
   @ApiOperation({
     summary: '팀원 검색 API',
-    description: '검색어와 일치하는 팀원들을 조회한다.',
+    description: 'keyword와 일치하는 팀원들을 조회한다.',
   })
   @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiQuery({ type: 'number', name: 'teamId' })
@@ -74,8 +74,7 @@ export class MembersController {
   //팀 관리자 API
   @ApiOperation({
     summary: '(팀 관리자)팀원 추가 API',
-    description:
-      'teamId와 userId를 query로, 팀원 정보를 body로 받아 팀원을 추가한다.',
+    description: 'teamId와 userId, 팀원 정보를 받아 팀원을 추가한다.',
   })
   @ApiQuery({ type: 'number', name: 'userId' })
   @ApiQuery({ type: 'number', name: 'teamId' })

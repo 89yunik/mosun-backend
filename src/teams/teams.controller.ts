@@ -35,7 +35,7 @@ export class TeamsController {
 
   @ApiOperation({
     summary: '팀 생성 API',
-    description: '팀 정보와 로그인된 사용자 정보로 팀을 생성한다.',
+    description: '팀을 생성한다.',
   })
   @ApiBody({ type: CreateTeamDto })
   @ApiResponse({ status: 201 })
@@ -65,7 +65,7 @@ export class TeamsController {
 
   @ApiOperation({
     summary: '팀 검색 API',
-    description: '검색어와 일치하는 팀들을 조회한다.',
+    description: 'keyword와 일치하는 팀들을 조회한다.',
   })
   @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: Team, isArray: true })
