@@ -15,11 +15,17 @@ export class UsersService {
     await this.usersRepository.save(user);
     return user;
   }
-  async readUsers(keyword: string): Promise<User[]> {
+  async readUsers(keyword?: string): Promise<User[]> {
     const readResult = await this.usersRepository
       .createQueryBuilder()
       .select()
-      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
+      .where(
+        `${
+          keyword
+            ? `MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
       .getMany();
     return readResult;
   }
