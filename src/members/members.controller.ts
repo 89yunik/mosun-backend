@@ -80,7 +80,7 @@ export class MembersController {
   @ApiQuery({ type: 'number', name: 'userId' })
   @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiBody({ type: CreateMemberDto, required: true })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createMember(@Req() req: Request): Promise<void> {

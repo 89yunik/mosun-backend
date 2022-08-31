@@ -35,7 +35,7 @@ export class ScoresController {
     description: '점수를 추가한다.',
   })
   @ApiBody({ type: CreateScoreDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createScore(@Req() req: Request): Promise<void> {

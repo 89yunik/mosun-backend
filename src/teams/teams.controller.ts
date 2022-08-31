@@ -38,7 +38,7 @@ export class TeamsController {
     description: '팀 정보와 로그인된 사용자 정보로 팀을 생성한다.',
   })
   @ApiBody({ type: CreateTeamDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createTeam(@Req() req: Request): Promise<void> {
