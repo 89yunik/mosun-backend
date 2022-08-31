@@ -22,10 +22,13 @@ export class ScoresService {
   async readScores(options?: ReadScoreDto) {
     const readResult = await this.scoresRepository
       .createQueryBuilder('score')
-      .select('score.memberId', 'memberId')
-      .addSelect('SUM(score.point)', 'sum')
-      .innerJoin('score.record', 'record')
-      .innerJoin('record.schedule', 'schedule')
+      .select('user.name', 'memberName')
+      .addSelect('SUM(score.point)', 'totalScore')
+      .addSelect(`RANK() over (ORDER BY 'totalScore' desc)`, 'rank')
+      .leftJoin('score.record', 'record')
+      .leftJoin('record.schedule', 'schedule')
+      .leftJoin('score.member', 'member')
+      .leftJoin('member.user', 'user')
       .andWhere(
         `${
           options.period
