@@ -75,7 +75,9 @@ export class AuthController {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
-    const members = await this.membersService.readMembers({ userId: user.id });
+    const members = await this.membersService.readMembersOfUser({
+      userId: user.id,
+    });
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
     user.members = members;
@@ -122,7 +124,9 @@ export class AuthController {
     const user = req.user;
     const refreshExp = Number(process.env.JWT_REFRESH_EXP);
     const accessExp = Number(process.env.JWT_ACCESS_EXP);
-    const members = await this.membersService.readMembers({ userId: user.id });
+    const members = await this.membersService.readMembersOfUser({
+      userId: user.id,
+    });
     const refreshToken = this.authService.setToken('refresh');
     this.usersService.updateUser(user, { refreshToken });
     user.members = members;
@@ -157,7 +161,7 @@ export class AuthController {
       const user: Partial<LoginedUser> = await this.usersService.readUser({
         refreshToken,
       });
-      const members = await this.membersService.readMembers({
+      const members = await this.membersService.readMembersOfUser({
         userId: user.id,
       });
       user.members = members;
