@@ -59,7 +59,7 @@ export class UsersController {
   })
   @ApiBody({ type: UpdateUserDto, required: true })
   @ApiResponse({ status: 200 })
-  @Put('profile')
+  @Put()
   @UseGuards(JwtAuthGuard)
   async updateLoginedUser(@Req() req): Promise<void> {
     const id = req.user.id;
@@ -72,7 +72,7 @@ export class UsersController {
     description: '로그인된 사용자 정보를 삭제한다.',
   })
   @ApiResponse({ status: 200 })
-  @Delete('profile')
+  @Delete()
   @UseGuards(JwtAuthGuard)
   async deleteLoginedUser(@Req() req): Promise<void> {
     const id = req.user.id;

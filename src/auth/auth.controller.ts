@@ -152,8 +152,8 @@ export class AuthController {
     summary: 'accessToken 재발급 API',
     description: '토큰을 재발급한다.',
   })
-  @ApiResponse({ status: 200, description: 'accessToken', type: AccessToken })
-  @Get('accessToken')
+  @ApiResponse({ status: 200 })
+  @Get('access-token')
   async getAccessToken(@Req() req, @Res() res): Promise<void> {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
