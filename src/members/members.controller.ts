@@ -24,14 +24,14 @@ import { Member } from './member.entity';
 import { MembersService } from './members.service';
 
 @ApiTags('Members')
-@Controller('teams/:teamId/members')
+@Controller('teams/:teamId')
 export class MembersController {
   constructor(private membersService: MembersService) {}
 
   @ApiOperation({ summary: '팀원 가입 API', description: '팀에 가입한다.' })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Post()
+  @Post('members')
   @UseGuards(JwtAuthGuard)
   async createUserMember(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
@@ -47,20 +47,21 @@ export class MembersController {
     summary: '팀원 검색 API',
     description: '검색어와 일치하는 팀원들을 조회한다.',
   })
+  @ApiParam({ name: 'keyword' })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200, type: Member, isArray: true })
-  @Get()
+  @Get('members/:keyword')
   @UseGuards(JwtAuthGuard)
   readMembers(@Req() req: Request): Promise<Member[]> {
     const teamId = Number(req.params.teamId);
-    const memberInfo = req.body;
-    return this.membersService.readMembers({ teamId, ...memberInfo });
+    const keyword = req.params.keyword;
+    return this.membersService.readMembers({ teamId }, keyword);
   }
 
   @ApiOperation({ summary: '팀원 탈퇴 API', description: '팀에서 탈퇴한다.' })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Delete()
+  @Delete('members')
   deleteUserMember(@Req() req) {
     const teamId = req.params.teamId;
     const userId = req.user.id;
@@ -77,7 +78,7 @@ export class MembersController {
   @ApiParam({ name: 'teamId' })
   @ApiBody({ type: CreateMemberDto, required: true })
   @ApiResponse({ status: 200 })
-  @Post(':userId')
+  @Post('users/:userId/members')
   @UseGuards(JwtAuthGuard)
   async createMember(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
@@ -110,7 +111,7 @@ export class MembersController {
   @ApiParam({ name: 'teamId' })
   @ApiBody({ type: UpdateMemberDto })
   @ApiResponse({ status: 200 })
-  @Put(':memberId')
+  @Put('members/:memberId')
   @UseGuards(JwtAuthGuard)
   async updateMember(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);
@@ -147,7 +148,7 @@ export class MembersController {
   @ApiParam({ name: 'memberId' })
   @ApiParam({ name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Delete(':memberId')
+  @Delete('members/:memberId')
   @UseGuards(JwtAuthGuard)
   async deleteMember(@Req() req): Promise<void> {
     const teamId = Number(req.params.teamId);

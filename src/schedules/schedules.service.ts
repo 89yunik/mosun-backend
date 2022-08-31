@@ -18,8 +18,13 @@ export class SchedulesService {
     return schedule;
   }
 
-  async readSchedules(options?: Partial<Schedule>): Promise<Schedule[]> {
-    return this.schedulesRepository.findBy(options);
+  async readSchedules(keyword: string): Promise<Schedule[]> {
+    const readResult = await this.schedulesRepository
+      .createQueryBuilder()
+      .select()
+      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
+      .getMany();
+    return readResult;
   }
   async updateSchedule(
     target: Partial<Schedule>,

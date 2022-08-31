@@ -66,11 +66,13 @@ export class TeamsController {
     summary: '팀 검색 API',
     description: '검색어와 일치하는 팀들을 조회한다.',
   })
+  @ApiParam({ name: 'keyword' })
   @ApiResponse({ status: 200, type: Team, isArray: true })
-  @Get()
+  @Get(':keyword')
   @UseGuards(JwtAuthGuard)
-  readTeams(): Promise<Team[]> {
-    return this.teamsService.readTeams();
+  readTeams(@Req() req: Request): Promise<Team[]> {
+    const keyword = req.params.keyword;
+    return this.teamsService.readTeams(keyword);
   }
 
   @ApiOperation({
