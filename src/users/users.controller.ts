@@ -10,7 +10,7 @@ import {
 import {
   ApiBody,
   ApiOperation,
-  ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -42,14 +42,14 @@ export class UsersController {
 
   @ApiOperation({
     summary: '사용자 검색 API',
-    description: '검색어와 일치하는 사용자들을 조회한다.',
+    description: 'keyword와 일치하는 사용자들을 조회한다.',
   })
-  @ApiParam({ name: 'keyword' })
+  @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: User, isArray: true })
-  @Get(':keyword')
+  @Get()
   @UseGuards(JwtAuthGuard)
   readUsers(@Req() req: Request): Promise<User[]> {
-    const keyword = req.params.keyword;
+    const keyword = typeof req.query.keyword === 'string' && req.query.keyword;
     return this.usersService.readUsers(keyword);
   }
 
@@ -59,11 +59,11 @@ export class UsersController {
   })
   @ApiBody({ type: UpdateUserDto, required: true })
   @ApiResponse({ status: 200 })
-  @Put('profile')
+  @Put()
   @UseGuards(JwtAuthGuard)
-  async updateLoginedUser(@Req() req): Promise<void> {
+  async updateLoginedUser(@Req() req: Request): Promise<void> {
     const id = req.user.id;
-    const update = req.body;
+    const update: UpdateUserDto = req.body;
     this.usersService.updateUser({ id }, update);
   }
 
@@ -72,9 +72,9 @@ export class UsersController {
     description: '로그인된 사용자 정보를 삭제한다.',
   })
   @ApiResponse({ status: 200 })
-  @Delete('profile')
+  @Delete()
   @UseGuards(JwtAuthGuard)
-  async deleteLoginedUser(@Req() req): Promise<void> {
+  async deleteLoginedUser(@Req() req: Request): Promise<void> {
     const id = req.user.id;
     this.usersService.deleteUser({ id });
   }

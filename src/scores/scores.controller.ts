@@ -21,6 +21,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateScoreDto } from './dtos/create-score.dto';
 import { ReadScoreDto } from './dtos/read-score.dto';
+import { ScoreRank } from './dtos/score-rank';
 import { UpdateScoreDto } from './dtos/update-score.dto';
 import { Score } from './score.entity';
 import { ScoresService } from './scores.service';
@@ -35,11 +36,11 @@ export class ScoresController {
     description: '점수를 추가한다.',
   })
   @ApiBody({ type: CreateScoreDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createScore(@Req() req: Request): Promise<void> {
-    const scoreInfo = req.body;
+    const scoreInfo: CreateScoreDto = req.body;
     await this.scoresService.createScore(scoreInfo);
   }
 
@@ -51,7 +52,7 @@ export class ScoresController {
   @ApiResponse({ status: 200 })
   @Get()
   @UseGuards(JwtAuthGuard)
-  async readScores(@Req() req: Request): Promise<Score[]> {
+  async readScores(@Req() req: Request): Promise<ScoreRank[]> {
     const start = typeof req.query.start === 'string' && req.query.start;
     const end = typeof req.query.end === 'string' && req.query.end;
     const period = req.query.start && req.query.end && { start, end };
@@ -77,7 +78,7 @@ export class ScoresController {
   @UseGuards(JwtAuthGuard)
   async updateScore(@Req() req: Request): Promise<void> {
     const scoreId = Number(req.params.scoreId);
-    const scoreInfo = req.body;
+    const scoreInfo: UpdateScoreDto = req.body;
     const updateResult = await this.scoresService.updateScore(
       { id: scoreId },
       scoreInfo,

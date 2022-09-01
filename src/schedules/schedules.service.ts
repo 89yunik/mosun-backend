@@ -22,7 +22,13 @@ export class SchedulesService {
     const readResult = await this.schedulesRepository
       .createQueryBuilder()
       .select()
-      .where(`MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
+      .where(
+        `${
+          keyword
+            ? `MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
       .getMany();
     return readResult;
   }

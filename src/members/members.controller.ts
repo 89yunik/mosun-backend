@@ -13,6 +13,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -24,17 +25,17 @@ import { Member } from './member.entity';
 import { MembersService } from './members.service';
 
 @ApiTags('Members')
-@Controller('teams/:teamId')
+@Controller('members')
 export class MembersController {
   constructor(private membersService: MembersService) {}
 
   @ApiOperation({ summary: '팀원 가입 API', description: '팀에 가입한다.' })
-  @ApiParam({ name: 'teamId' })
-  @ApiResponse({ status: 200 })
-  @Post('members')
+  @ApiQuery({ type: 'number', name: 'teamId' })
+  @ApiResponse({ status: 201 })
+  @Post('sign-up')
   @UseGuards(JwtAuthGuard)
   async createUserMember(@Req() req): Promise<void> {
-    const teamId = Number(req.params.teamId);
+    const teamId = Number(req.query.teamId);
     const userId = req.user.id;
     await this.membersService.createMember({
       teamId,
@@ -45,25 +46,27 @@ export class MembersController {
 
   @ApiOperation({
     summary: '팀원 검색 API',
-    description: '검색어와 일치하는 팀원들을 조회한다.',
+    description: 'keyword와 일치하는 팀원들을 조회한다.',
   })
-  @ApiParam({ name: 'keyword' })
-  @ApiParam({ name: 'teamId' })
+  @ApiQuery({ type: 'string', name: 'keyword', required: false })
+  @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiResponse({ status: 200, type: Member, isArray: true })
-  @Get('members/:keyword')
+  @Get()
   @UseGuards(JwtAuthGuard)
   readMembers(@Req() req: Request): Promise<Member[]> {
-    const teamId = Number(req.params.teamId);
-    const keyword = req.params.keyword;
-    return this.membersService.readMembers({ teamId }, keyword);
+    const teamId = Number(req.query.teamId);
+    const keyword = typeof req.query.keyword === 'string' && req.query.keyword;
+    const readResult = this.membersService.readMembers(teamId, keyword);
+    return readResult;
   }
 
   @ApiOperation({ summary: '팀원 탈퇴 API', description: '팀에서 탈퇴한다.' })
-  @ApiParam({ name: 'teamId' })
+  @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Delete('members')
+  @Delete()
+  @UseGuards(JwtAuthGuard)
   deleteUserMember(@Req() req) {
-    const teamId = req.params.teamId;
+    const teamId = Number(req.query.teamId);
     const userId = req.user.id;
     this.membersService.deleteMember({ teamId, userId });
   }
@@ -71,25 +74,24 @@ export class MembersController {
   //팀 관리자 API
   @ApiOperation({
     summary: '(팀 관리자)팀원 추가 API',
-    description:
-      'teamId와 userId를 parameter로, 팀원 정보를 body로 받아 팀원을 추가한다.',
+    description: 'teamId와 userId, 팀원 정보를 받아 팀원을 추가한다.',
   })
-  @ApiParam({ name: 'userId' })
-  @ApiParam({ name: 'teamId' })
+  @ApiQuery({ type: 'number', name: 'userId' })
+  @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiBody({ type: CreateMemberDto, required: true })
-  @ApiResponse({ status: 200 })
-  @Post('users/:userId/members')
+  @ApiResponse({ status: 201 })
+  @Post()
   @UseGuards(JwtAuthGuard)
   async createMember(@Req() req: Request): Promise<void> {
-    const teamId = Number(req.params.teamId);
+    const teamId = Number(req.query.teamId);
     const members = req.user.members;
     const admin = members.find(
       (member: Member) =>
         member.teamId === teamId && member.authority === 'admin',
     );
     if (admin) {
-      const memberInfo = req.body;
-      const userId = Number(req.params.userId);
+      const memberInfo: CreateMemberDto = req.body;
+      const userId = Number(req.query.userId);
       await this.membersService.createMember({
         teamId,
         userId,
@@ -108,13 +110,13 @@ export class MembersController {
     description: '사용자가 관리하는 팀의 팀원 권한을 수정한다.',
   })
   @ApiParam({ name: 'memberId' })
-  @ApiParam({ name: 'teamId' })
+  @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiBody({ type: UpdateMemberDto })
   @ApiResponse({ status: 200 })
-  @Put('members/:memberId')
+  @Put(':memberId')
   @UseGuards(JwtAuthGuard)
-  async updateMember(@Req() req): Promise<void> {
-    const teamId = Number(req.params.teamId);
+  async updateMember(@Req() req: Request): Promise<void> {
+    const teamId = Number(req.query.teamId);
     const members = req.user.members;
     const admin = members.find(
       (member: Member) =>
@@ -122,7 +124,7 @@ export class MembersController {
     );
     if (admin) {
       const memberId = Number(req.params.memberId);
-      const update = req.body;
+      const update: UpdateMemberDto = req.body;
       const updateResult = await this.membersService.updateMember(
         { id: memberId, teamId },
         update,
@@ -146,12 +148,12 @@ export class MembersController {
     description: '사용자가 관리하는 팀의 팀원을 삭제한다.',
   })
   @ApiParam({ name: 'memberId' })
-  @ApiParam({ name: 'teamId' })
+  @ApiQuery({ type: 'number', name: 'teamId' })
   @ApiResponse({ status: 200 })
-  @Delete('members/:memberId')
+  @Delete(':memberId')
   @UseGuards(JwtAuthGuard)
-  async deleteMember(@Req() req): Promise<void> {
-    const teamId = Number(req.params.teamId);
+  async deleteMember(@Req() req: Request): Promise<void> {
+    const teamId = Number(req.query.teamId);
     const members = req.user.members;
     const admin = members.find(
       (member: Member) =>

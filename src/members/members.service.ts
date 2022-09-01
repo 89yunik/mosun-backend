@@ -15,21 +15,25 @@ export class MembersService {
     await this.membersRepository.save(member);
   }
 
-  async readMembers(
-    options: Partial<Member>,
-    keyword?: string,
-  ): Promise<Member[]> {
-    let readResult;
-    if (keyword) {
-      readResult = await this.membersRepository
-        .createQueryBuilder('member')
-        .select(['user.name', 'member.authority'])
-        .innerJoin('member.user', 'user')
-        .where(`MATCH(user.name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`)
-        .getMany();
-    } else {
-      readResult = this.membersRepository.findBy(options);
-    }
+  async readMembers(teamId: number, keyword?: string): Promise<Member[]> {
+    const readResult = await this.membersRepository
+      .createQueryBuilder('member')
+      .select(['user.name', 'member.authority'])
+      .innerJoin('member.user', 'user')
+      .where(`member.teamId = '${teamId}'`)
+      .andWhere(
+        `${
+          keyword
+            ? `MATCH(user.name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
+      .getMany();
+    return readResult;
+  }
+
+  async readMembersOfUser(options: Partial<Member>) {
+    const readResult = this.membersRepository.findBy(options);
     return readResult;
   }
 

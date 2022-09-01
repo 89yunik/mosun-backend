@@ -13,6 +13,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -24,7 +25,7 @@ import { Record } from './record.entity';
 import { RecordsService } from './records.service';
 
 @ApiTags('Records')
-@Controller()
+@Controller('records')
 export class RecordsController {
   constructor(private recordsService: RecordsService) {}
 
@@ -33,11 +34,11 @@ export class RecordsController {
     description: '전적을 추가한다.',
   })
   @ApiBody({ type: CreateRecordDto })
-  @ApiResponse({ status: 200 })
-  @Post('records')
+  @ApiResponse({ status: 201 })
+  @Post()
   @UseGuards(JwtAuthGuard)
   async createRecord(@Req() req: Request): Promise<void> {
-    const recordInfo = req.body;
+    const recordInfo: CreateRecordDto = req.body;
     await this.recordsService.createRecord(recordInfo);
   }
 
@@ -45,14 +46,14 @@ export class RecordsController {
     summary: '전적 조회 API',
     description: '검색 조건과 일치하는 전적들을 조회한다.',
   })
-  @ApiParam({ name: 'type' })
-  @ApiParam({ name: 'scheduleId' })
+  @ApiQuery({ name: 'type', required: false })
+  @ApiQuery({ name: 'scheduleId' })
   @ApiResponse({ status: 200 })
-  @Get('schedules/:scheduleId/records/:type')
+  @Get()
   @UseGuards(JwtAuthGuard)
   async readRecords(@Req() req: Request): Promise<Record[]> {
-    const scheduleId = Number(req.params.scheduleId);
-    const type = req.params.type === 'all' ? undefined : req.params.type;
+    const scheduleId = Number(req.query.scheduleId);
+    const type = typeof req.query.type === 'string' && req.query.type;
     const result = await this.recordsService.readRecords({ scheduleId, type });
     return result;
   }
@@ -64,11 +65,11 @@ export class RecordsController {
   @ApiParam({ name: 'recordId' })
   @ApiBody({ type: UpdateRecordDto })
   @ApiResponse({ status: 200 })
-  @Put('records/:recordId')
+  @Put(':recordId')
   @UseGuards(JwtAuthGuard)
   async updateRecord(@Req() req: Request): Promise<void> {
     const recordId = Number(req.params.recordId);
-    const recordInfo = req.body;
+    const recordInfo: UpdateRecordDto = req.body;
     const updateResult = await this.recordsService.updateRecord(
       { id: recordId },
       recordInfo,
@@ -87,7 +88,7 @@ export class RecordsController {
   })
   @ApiParam({ name: 'recordId' })
   @ApiResponse({ status: 200 })
-  @Delete('records/:recordId')
+  @Delete(':recordId')
   @UseGuards(JwtAuthGuard)
   async deleteRecord(@Req() req: Request): Promise<void> {
     const recordId = Number(req.params.recordId);

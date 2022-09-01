@@ -13,6 +13,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -34,10 +35,10 @@ export class TeamsController {
 
   @ApiOperation({
     summary: '팀 생성 API',
-    description: '팀 정보와 로그인된 사용자 정보로 팀을 생성한다.',
+    description: '팀을 생성한다.',
   })
   @ApiBody({ type: CreateTeamDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createTeam(@Req() req: Request): Promise<void> {
@@ -55,7 +56,7 @@ export class TeamsController {
     description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
   })
   @ApiResponse({ status: 200, type: Member })
-  @Get('affiliatedTeam')
+  @Get('joined')
   @UseGuards(JwtAuthGuard)
   async readTeamsOfUser(@Req() req: Request): Promise<Member[]> {
     const members = req.user.members;
@@ -64,14 +65,14 @@ export class TeamsController {
 
   @ApiOperation({
     summary: '팀 검색 API',
-    description: '검색어와 일치하는 팀들을 조회한다.',
+    description: 'keyword와 일치하는 팀들을 조회한다.',
   })
-  @ApiParam({ name: 'keyword' })
+  @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: Team, isArray: true })
-  @Get(':keyword')
+  @Get()
   @UseGuards(JwtAuthGuard)
   readTeams(@Req() req: Request): Promise<Team[]> {
-    const keyword = req.params.keyword;
+    const keyword = typeof req.query.keyword === 'string' && req.query.keyword;
     return this.teamsService.readTeams(keyword);
   }
 
@@ -84,7 +85,7 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Put(':teamId')
   @UseGuards(JwtAuthGuard)
-  async updateTeam(@Req() req): Promise<void> {
+  async updateTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
     const members = req.user.members;
     const admin = members.find(
@@ -92,7 +93,7 @@ export class TeamsController {
         member.teamId === teamId && member.authority === 'admin',
     );
     if (admin) {
-      const update = req.body;
+      const update: UpdateTeamDto = req.body;
       await this.teamsService.updateTeam({ id: teamId }, update);
     } else {
       throw new HttpException(
@@ -110,7 +111,7 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Delete(':teamId')
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Req() req): Promise<void> {
+  async deleteTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
     const members = req.user.members;
     const admin = members.find(
