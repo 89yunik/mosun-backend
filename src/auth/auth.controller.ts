@@ -14,12 +14,7 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Request, Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import {
-  ApiOperation,
-  ApiProperty,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MembersService } from 'src/members/members.service';
 import { Member } from 'src/members/member.entity';
 
@@ -35,11 +30,6 @@ declare global {
       user: LoginedUser;
     }
   }
-}
-
-class AccessToken {
-  @ApiProperty()
-  accessToken: string;
 }
 @ApiTags('Auth')
 @Controller('auth')
@@ -154,8 +144,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 200 })
   @Get('access-token')
-  async getAccessToken(@Req() req, @Res() res): Promise<void> {
-    const refreshToken = req.cookies.refreshToken;
+  async getAccessToken(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const refreshToken: string = req.cookies.refreshToken;
     if (refreshToken) {
       const accessExp = Number(process.env.JWT_ACCESS_EXP);
       const user: Partial<LoginedUser> = await this.usersService.readUser({

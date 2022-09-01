@@ -41,7 +41,7 @@ export class SchedulesController {
     const memberId = Number(req.body.memberId);
     const members = req.user.members;
     if (members.find((member) => member.id === memberId)) {
-      const scheduleInfo = req.body;
+      const scheduleInfo: CreateScheduleDto = req.body;
       scheduleInfo.date = new Date(scheduleInfo.date);
       await this.schedulesService.createSchedule(scheduleInfo);
     } else {
@@ -87,10 +87,10 @@ export class SchedulesController {
   @ApiResponse({ status: 200 })
   @Put(':scheduleId')
   @UseGuards(JwtAuthGuard)
-  async updateSchedule(@Req() req): Promise<void> {
+  async updateSchedule(@Req() req: Request): Promise<void> {
     const scheduleId = Number(req.params.scheduleId);
     const memberId = Number(req.query.memberId);
-    const scheduleInfo = req.body;
+    const scheduleInfo: UpdateScheduleDto = req.body;
     if (scheduleInfo.date) {
       scheduleInfo.date = new Date(scheduleInfo.date);
     }
@@ -115,7 +115,7 @@ export class SchedulesController {
   @ApiResponse({ status: 200 })
   @Delete(':scheduleId')
   @UseGuards(JwtAuthGuard)
-  async deleteSchedule(@Req() req): Promise<void> {
+  async deleteSchedule(@Req() req: Request): Promise<void> {
     const scheduleId = Number(req.params.scheduleId);
     const memberId = Number(req.query.memberId);
     const deleteResult = await this.schedulesService.deleteSchedule({

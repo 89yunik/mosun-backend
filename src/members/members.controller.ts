@@ -90,7 +90,7 @@ export class MembersController {
         member.teamId === teamId && member.authority === 'admin',
     );
     if (admin) {
-      const memberInfo = req.body;
+      const memberInfo: CreateMemberDto = req.body;
       const userId = Number(req.query.userId);
       await this.membersService.createMember({
         teamId,
@@ -115,7 +115,7 @@ export class MembersController {
   @ApiResponse({ status: 200 })
   @Put(':memberId')
   @UseGuards(JwtAuthGuard)
-  async updateMember(@Req() req): Promise<void> {
+  async updateMember(@Req() req: Request): Promise<void> {
     const teamId = Number(req.query.teamId);
     const members = req.user.members;
     const admin = members.find(
@@ -124,7 +124,7 @@ export class MembersController {
     );
     if (admin) {
       const memberId = Number(req.params.memberId);
-      const update = req.body;
+      const update: UpdateMemberDto = req.body;
       const updateResult = await this.membersService.updateMember(
         { id: memberId, teamId },
         update,
@@ -152,7 +152,7 @@ export class MembersController {
   @ApiResponse({ status: 200 })
   @Delete(':memberId')
   @UseGuards(JwtAuthGuard)
-  async deleteMember(@Req() req): Promise<void> {
+  async deleteMember(@Req() req: Request): Promise<void> {
     const teamId = Number(req.query.teamId);
     const members = req.user.members;
     const admin = members.find(

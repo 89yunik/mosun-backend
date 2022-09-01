@@ -61,9 +61,9 @@ export class UsersController {
   @ApiResponse({ status: 200 })
   @Put()
   @UseGuards(JwtAuthGuard)
-  async updateLoginedUser(@Req() req): Promise<void> {
+  async updateLoginedUser(@Req() req: Request): Promise<void> {
     const id = req.user.id;
-    const update = req.body;
+    const update: UpdateUserDto = req.body;
     this.usersService.updateUser({ id }, update);
   }
 
@@ -74,7 +74,7 @@ export class UsersController {
   @ApiResponse({ status: 200 })
   @Delete()
   @UseGuards(JwtAuthGuard)
-  async deleteLoginedUser(@Req() req): Promise<void> {
+  async deleteLoginedUser(@Req() req: Request): Promise<void> {
     const id = req.user.id;
     this.usersService.deleteUser({ id });
   }

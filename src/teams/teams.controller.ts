@@ -85,7 +85,7 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Put(':teamId')
   @UseGuards(JwtAuthGuard)
-  async updateTeam(@Req() req): Promise<void> {
+  async updateTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
     const members = req.user.members;
     const admin = members.find(
@@ -93,7 +93,7 @@ export class TeamsController {
         member.teamId === teamId && member.authority === 'admin',
     );
     if (admin) {
-      const update = req.body;
+      const update: UpdateTeamDto = req.body;
       await this.teamsService.updateTeam({ id: teamId }, update);
     } else {
       throw new HttpException(
@@ -111,7 +111,7 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Delete(':teamId')
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Req() req): Promise<void> {
+  async deleteTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
     const members = req.user.members;
     const admin = members.find(

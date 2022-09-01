@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateScoreDto } from './dtos/create-score.dto';
 import { ReadScoreDto } from './dtos/read-score.dto';
+import { ScoreRank } from './dtos/score-rank';
 import { UpdateScoreDto } from './dtos/update-score.dto';
 import { Score } from './score.entity';
 
@@ -19,7 +20,7 @@ export class ScoresService {
     return score;
   }
 
-  async readScores(options?: ReadScoreDto) {
+  async readScores(options?: ReadScoreDto): Promise<ScoreRank[]> {
     const readResult = await this.scoresRepository
       .createQueryBuilder('score')
       .select('user.name', 'memberName')

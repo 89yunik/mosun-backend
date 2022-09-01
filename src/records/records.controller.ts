@@ -38,7 +38,7 @@ export class RecordsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async createRecord(@Req() req: Request): Promise<void> {
-    const recordInfo = req.body;
+    const recordInfo: CreateRecordDto = req.body;
     await this.recordsService.createRecord(recordInfo);
   }
 
@@ -69,7 +69,7 @@ export class RecordsController {
   @UseGuards(JwtAuthGuard)
   async updateRecord(@Req() req: Request): Promise<void> {
     const recordId = Number(req.params.recordId);
-    const recordInfo = req.body;
+    const recordInfo: UpdateRecordDto = req.body;
     const updateResult = await this.recordsService.updateRecord(
       { id: recordId },
       recordInfo,
