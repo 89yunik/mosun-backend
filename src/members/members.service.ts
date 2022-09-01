@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateMemberDto } from './dtos/create-member.dto';
 import { Member } from './member.entity';
 
@@ -15,8 +15,26 @@ export class MembersService {
     await this.membersRepository.save(member);
   }
 
-  readMembers(options: Partial<Member>): Promise<Member[]> {
-    return this.membersRepository.findBy(options);
+  async readMembers(teamId: number, keyword?: string): Promise<Member[]> {
+    const readResult = await this.membersRepository
+      .createQueryBuilder('member')
+      .select(['user.name', 'member.authority'])
+      .innerJoin('member.user', 'user')
+      .where(`member.teamId = '${teamId}'`)
+      .andWhere(
+        `${
+          keyword
+            ? `MATCH(user.name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
+      .getMany();
+    return readResult;
+  }
+
+  async readMembersOfUser(options: Partial<Member>) {
+    const readResult = this.membersRepository.findBy(options);
+    return readResult;
   }
 
   readMember(options: Partial<Member>): Promise<Member> {
@@ -25,11 +43,13 @@ export class MembersService {
   async updateMember(
     target: Partial<Member>,
     update: Partial<Member>,
-  ): Promise<void> {
-    await this.membersRepository.update(target, update);
+  ): Promise<UpdateResult> {
+    const updateResult = await this.membersRepository.update(target, update);
+    return updateResult;
   }
 
-  async deleteMember(target: Partial<Member>): Promise<void> {
-    await this.membersRepository.delete(target);
+  async deleteMember(target: Partial<Member>): Promise<DeleteResult> {
+    const deleteResult = await this.membersRepository.delete(target);
+    return deleteResult;
   }
 }

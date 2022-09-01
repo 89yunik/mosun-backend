@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User } from './user.entity';
 
@@ -15,22 +15,36 @@ export class UsersService {
     await this.usersRepository.save(user);
     return user;
   }
-  async readUsers(options?: Partial<User>): Promise<User[]> {
-    return this.usersRepository.findBy(options);
+  async readUsers(keyword?: string): Promise<User[]> {
+    const readResult = await this.usersRepository
+      .createQueryBuilder()
+      .select()
+      .where(
+        `${
+          keyword
+            ? `MATCH(name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            : 'TRUE'
+        }`,
+      )
+      .getMany();
+    return readResult;
   }
 
-  async readUser(options: Partial<User>): Promise<User> {
+  async readUser(options: Partial<User>): Promise<Partial<User>> {
     const user = await this.usersRepository.findOneBy(options);
-    return user;
+    if (user) {
+      const { id, email, name } = user;
+      return { id, email, name };
+    }
   }
 
-  async readOrCreateUser(target: CreateUserDto): Promise<User> {
-    let user = await this.readUser(target);
+  async readOrCreateUser(target: CreateUserDto): Promise<Partial<User>> {
+    let user = await this.readUser({ email: target.email });
     if (!user) {
       console.log('회원가입');
       user = await this.createUser(target);
     }
-    return user;
+    return { id: user.id, email: user.email, name: user.name };
   }
   async updateUser(
     target: Partial<User>,

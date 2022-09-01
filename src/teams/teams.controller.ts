@@ -13,6 +13,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -21,6 +22,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Member } from 'src/members/member.entity';
 import { MembersService } from 'src/members/members.service';
 import { CreateTeamDto } from './dtos/create-team.dto';
+import { UpdateTeamDto } from './dtos/update-team.dto';
 import { Team } from './team.entity';
 import { TeamsService } from './teams.service';
 @ApiTags('Teams')
@@ -33,16 +35,16 @@ export class TeamsController {
 
   @ApiOperation({
     summary: '팀 생성 API',
-    description: '팀 정보와 로그인된 사용자 정보로 팀을 생성한다.',
+    description: '팀을 생성한다.',
   })
   @ApiBody({ type: CreateTeamDto })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 201 })
   @Post()
   @UseGuards(JwtAuthGuard)
   async createTeam(@Req() req: Request): Promise<void> {
-    const teamInfo = req.body;
+    const teamInfo: CreateTeamDto = req.body;
     const team = await this.teamsService.createTeam(teamInfo);
-    this.membersService.createMember({
+    await this.membersService.createMember({
       teamId: team.id,
       userId: req.user.id,
       authority: 'admin',
@@ -54,24 +56,24 @@ export class TeamsController {
     description: '로그인된 사용자 정보로 소속된 팀을 조회한다.',
   })
   @ApiResponse({ status: 200, type: Member })
-  @Get('affiliatedTeam')
+  @Get('joined')
   @UseGuards(JwtAuthGuard)
   async readTeamsOfUser(@Req() req: Request): Promise<Member[]> {
-    const members = await this.membersService.readMembers({
-      userId: req.user.id,
-    });
+    const members = req.user.members;
     return members;
   }
 
   @ApiOperation({
     summary: '팀 검색 API',
-    description: '검색어와 일치하는 팀들을 조회한다.',
+    description: 'keyword와 일치하는 팀들을 조회한다.',
   })
+  @ApiQuery({ type: 'string', name: 'keyword', required: false })
   @ApiResponse({ status: 200, type: Team, isArray: true })
   @Get()
   @UseGuards(JwtAuthGuard)
-  readTeams(): Promise<Team[]> {
-    return this.teamsService.readTeams();
+  readTeams(@Req() req: Request): Promise<Team[]> {
+    const keyword = typeof req.query.keyword === 'string' && req.query.keyword;
+    return this.teamsService.readTeams(keyword);
   }
 
   @ApiOperation({
@@ -79,31 +81,24 @@ export class TeamsController {
     description: '사용자가 관리하는 팀 정보를 수정한다.',
   })
   @ApiParam({ name: 'teamId' })
-  @ApiBody({ type: Team })
+  @ApiBody({ type: UpdateTeamDto })
   @ApiResponse({ status: 200 })
   @Put(':teamId')
   @UseGuards(JwtAuthGuard)
-  async updateTeam(@Req() req): Promise<void> {
+  async updateTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
-    const userId = req.user.id;
-    const admin = await this.membersService.readMember({
-      userId,
-      teamId,
-    });
+    const members = req.user.members;
+    const admin = members.find(
+      (member: Member) =>
+        member.teamId === teamId && member.authority === 'admin',
+    );
     if (admin) {
-      if (admin.authority === 'admin') {
-        const update = req.body;
-        await this.teamsService.updateTeam({ id: teamId }, update);
-      } else {
-        throw new HttpException(
-          '팀 수정 권한이 없습니다.',
-          HttpStatus.FORBIDDEN,
-        );
-      }
+      const update: UpdateTeamDto = req.body;
+      await this.teamsService.updateTeam({ id: teamId }, update);
     } else {
       throw new HttpException(
-        '수정하려는 팀의 팀원이 아닙니다.',
-        HttpStatus.BAD_REQUEST,
+        '수정하려는 팀의 팀원이 아니거나, 팀 수정 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
       );
     }
   }
@@ -116,26 +111,19 @@ export class TeamsController {
   @ApiResponse({ status: 200 })
   @Delete(':teamId')
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Req() req): Promise<void> {
+  async deleteTeam(@Req() req: Request): Promise<void> {
     const teamId = Number(req.params.teamId);
-    const userId = req.user.id;
-    const admin = await this.membersService.readMember({
-      userId,
-      teamId,
-    });
+    const members = req.user.members;
+    const admin = members.find(
+      (member: Member) =>
+        member.teamId === teamId && member.authority === 'admin',
+    );
     if (admin) {
-      if (admin.authority === 'admin') {
-        this.teamsService.deleteTeam({ id: teamId });
-      } else {
-        throw new HttpException(
-          '팀 삭제 권한이 없습니다.',
-          HttpStatus.FORBIDDEN,
-        );
-      }
+      this.teamsService.deleteTeam({ id: teamId });
     } else {
       throw new HttpException(
-        '삭제하려는 팀의 팀원이 아닙니다.',
-        HttpStatus.BAD_REQUEST,
+        '삭제하려는 팀의 팀원이 아니거나, 팀 삭제 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
       );
     }
   }
