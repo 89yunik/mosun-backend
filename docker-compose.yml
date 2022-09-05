@@ -1,5 +1,20 @@
-# services:
-#   web:
-#     image: /app
-#     ports:
-#       - "3000:3000"
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    volumes:
+      - ./db_data:/var/lib/mysql
+    restart: always
+    ports:
+      - 3307:3306
+  app:
+    depends_on:
+      - db
+    build:
+      dockerfile: dockerfile
+      context: .
+    volumes:
+      - ./app_data:/var/www/html
+    ports:
+      - 3000:3000
