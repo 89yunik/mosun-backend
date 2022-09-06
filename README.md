@@ -7,7 +7,8 @@
 ## 사용 기술
 <img src="https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=Nestjs&logoColor=white"/> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=MySQL&logoColor=white"/> <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=Swagger&logoColor=white"/> <img src="https://img.shields.io/badge/Jest-C21325?style=flat-square&logo=Jest&logoColor=white"/> <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
 
-## 서비스 구성도
+## 기능 구성도
+![image](https://user-images.githubusercontent.com/78011716/188599577-6de383d3-79e3-4f9e-9032-c88e55956e78.png)
 
 ## ERD
 ![ERD](https://user-images.githubusercontent.com/78011716/188574883-23b0bbbc-9fe6-48ef-894b-9fcca762f8a0.png)
