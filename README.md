@@ -10,6 +10,8 @@
 ## 서비스 구성도
 
 ## ERD
+![ERD](https://user-images.githubusercontent.com/78011716/188574883-23b0bbbc-9fe6-48ef-894b-9fcca762f8a0.png)
+
 
 ## 설치
 
