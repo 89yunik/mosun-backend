@@ -11,7 +11,7 @@
 ![image](https://user-images.githubusercontent.com/78011716/195226728-373d1a98-6a9a-465d-8cc7-dd6e70e1c996.png)
 
 ## ERD
-![ERD](https://user-images.githubusercontent.com/78011716/188574883-23b0bbbc-9fe6-48ef-894b-9fcca762f8a0.png)
+![image](https://user-images.githubusercontent.com/78011716/195249950-b65529f4-74e7-497d-afef-ad9f1d05f8c7.png)
 
 
 ## 설치
