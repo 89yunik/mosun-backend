@@ -7,7 +7,7 @@ export class ReadScoreDto {
   @IsDate()
   period: PeriodDto;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, example: 'offline' })
   @IsString()
   type: string;
 
