@@ -18,13 +18,12 @@ export class MembersService {
   async readMembers(teamId: number, keyword?: string): Promise<Member[]> {
     const readResult = await this.membersRepository
       .createQueryBuilder('member')
-      .select(['user.name', 'member.authority'])
-      .innerJoin('member.user', 'user')
+      .select(['member.name', 'member.authority'])
       .where(`member.teamId = '${teamId}'`)
       .andWhere(
         `${
           keyword
-            ? `MATCH(user.name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
+            ? `MATCH(member.name) AGAINST ('${keyword}*' IN BOOLEAN MODE)`
             : 'TRUE'
         }`,
       )
