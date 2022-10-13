@@ -72,7 +72,7 @@ export class AuthController {
     this.usersService.updateUser(user, { refreshToken });
     user.members = members;
     const accessToken = this.authService.setToken('access', user);
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('refreshToken', user.id, {
       maxAge: refreshExp * 60 * 60 * 1000,
       sameSite: 'strict',
       httpOnly: true,
@@ -121,7 +121,7 @@ export class AuthController {
     this.usersService.updateUser(user, { refreshToken });
     user.members = members;
     const accessToken = this.authService.setToken('access', user);
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie('refreshToken', user.id, {
       maxAge: refreshExp * 60 * 60 * 1000,
       sameSite: 'strict',
       httpOnly: true,
@@ -148,11 +148,11 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
-    const refreshToken: string = req.cookies.refreshToken;
-    if (refreshToken) {
+    const id: number = req.cookies.refreshToken;
+    if (id) {
       const accessExp = Number(process.env.JWT_ACCESS_EXP);
       const user: Partial<LoginedUser> = await this.usersService.readUser({
-        refreshToken,
+        id,
       });
       const members = await this.membersService.readMembersOfUser({
         userId: user.id,
