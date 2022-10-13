@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  Index,
 } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { Team } from 'src/teams/team.entity';
@@ -41,4 +42,9 @@ export class Member {
   @ApiProperty()
   @Column({ type: 'varchar', length: 10 })
   authority: string;
+
+  @ApiProperty()
+  @Index({ fulltext: true })
+  @Column({ type: 'varchar', length: 20 })
+  name: string;
 }

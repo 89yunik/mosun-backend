@@ -12,4 +12,8 @@ export class CreateMemberDto {
   @IsString()
   @IsNotEmpty()
   authority: string;
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 }

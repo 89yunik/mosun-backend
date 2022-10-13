@@ -15,12 +15,12 @@ export class Schedule {
   id: number;
 
   @ApiProperty()
-  @Column({ name: 'memberId', update: false })
+  @Column({ name: 'memberId', update: false, nullable: true })
   memberId: number;
   @ManyToOne(() => Member, (member) => member.id, {
     cascade: true,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
+    onUpdate: 'SET NULL',
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'memberId' })
   member: Member;

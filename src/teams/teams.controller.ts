@@ -48,6 +48,7 @@ export class TeamsController {
       teamId: team.id,
       userId: req.user.id,
       authority: 'admin',
+      name: req.user.name,
     });
   }
 

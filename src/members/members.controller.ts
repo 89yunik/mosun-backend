@@ -34,13 +34,15 @@ export class MembersController {
   @ApiResponse({ status: 201 })
   @Post('sign-up')
   @UseGuards(JwtAuthGuard)
-  async createUserMember(@Req() req): Promise<void> {
+  async createUserMember(@Req() req: Request): Promise<void> {
     const teamId = Number(req.query.teamId);
     const userId = req.user.id;
+    const name = req.user.name;
     await this.membersService.createMember({
       teamId,
       userId,
       authority: 'user',
+      name,
     });
   }
 
